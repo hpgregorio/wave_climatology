@@ -33,13 +33,13 @@ def convert_to_cardinal(direction_numeric):
 	dir_grid[0] = 360 - 22.5
 
 	index = np.searchsorted(dir_grid, direction_numeric, side='right') - 1
-	
+
 	# Corrigir para valores próximos a 360
 	if direction_numeric > 337.5 or direction_numeric < 0.0:
 		index = 0
-	
+
 	index = np.clip(index, 0, len(cardinal_directions) - 1)
-	
+
 	return cardinal_directions[index]
 
 
@@ -48,35 +48,12 @@ def load_data(location, years):
 	dataframes_list = []
 
 	for year in years:
-		#filename = f"http://hpgregorio.net/nc_ondas/ONDAS_{location}_{year}.nc"
-		#filename = f"ONDAS_{location}_{year}.nc"
-		#file = fsspec.open(filename)
-		#dataset = xr.open_dataset(file.open())
-		#dataset = xr.open_dataset(filename)
-		
-		
-		
-		filename = f"ONDAS_{location}_{year}.nc"
-
-		# Verifica se o arquivo está presente localmente
-		if not os.path.exists(filename):
-			remote_url = f"http://hpgregorio.net/dados_ondas/{filename}"
-
-			# Tenta baixar o arquivo remotamente
-			try:
-				response = requests.get(remote_url)
-				response.raise_for_status()  # Lança um erro se a solicitação não for bem-sucedida
-
-				with open(filename, 'wb') as f:
-					f.write(response.content)
-			except requests.exceptions.RequestException as e:
-				print(f"Erro ao baixar o arquivo {filename}: {e}")
-				continue
+		filename = f"https://hpgregorio.net/nc_ondas/ONDAS_{location}_{year}.nc"
 
 		dataset = xr.open_dataset(filename)
-		
 
-		
+
+
 		start_date = datetime(year, 1, 1, 0, 0)
 		time_steps = dataset.dims['time']
 		time_array = [start_date + timedelta(hours=3 * i) for i in range(time_steps)]
@@ -87,7 +64,7 @@ def load_data(location, years):
 			'VMDR': dataset['VMDR'].squeeze().values,
 			'VTPK': dataset['VTPK'].squeeze().values
 		})
-		
+
 		# Converter direções numéricas para direções cardinais
 		df['CardinalDirection'] = df['VMDR'].apply(convert_to_cardinal)
 
@@ -106,7 +83,7 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 		df['Range'] = pd.Categorical(df[parametro], categories=bins, ordered=True)
 	else:
 		df['Range'] = pd.cut(df[parametro], bins=bins, labels=labels, right=False)
-	
+
 	# Calculando a distribuição de altura das ondas em cada intervalo por mês
 	height_distribution = df.groupby([df['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
 
@@ -115,7 +92,7 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 
 	# Obtendo os nomes dos meses
 	month_names = ['Jan', 'Fev', 'Mar' , 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-	
+
 	title_years = f"{selected_years[0]} a {selected_years[-1]}"
 
 	# Criando o gráfico de barras empilhadas com Plotly
@@ -125,7 +102,7 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 			x=month_names,
 			y=height_distribution_percentage[col],
 			name=f'{col}',
-			marker=dict(color=bin_color_map[col])  
+			marker=dict(color=bin_color_map[col])
 		)
 		traces.append(trace)
 
@@ -147,7 +124,7 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 
 
 def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_parametro, bin_color_map):
-	
+
 	month_data = df[df['Datetime'].dt.month == mes]
 
 	if parametro == 'CardinalDirection':
@@ -159,9 +136,9 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 	month_height_distribution_percentage = month_height_distribution.div(month_height_distribution.sum(axis=1), axis=0) * 100
 
 	years = list(selected_years)  # Converter para lista
-	
+
 	month_names = ['Janeiro', 'Fevereiro', 'Março' , 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-	
+
 	title_month = f"{month_names[mes-1]}"
 
 	traces = []
@@ -170,7 +147,7 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 			x=years,
 			y=month_height_distribution_percentage[col],
 			name=f'{col}',
-			marker=dict(color=bin_color_map[col])  
+			marker=dict(color=bin_color_map[col])
 		)
 		traces.append(trace)
 
@@ -185,7 +162,7 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
 	)
-	
+
 	#step_size = 1
 	years_ticks = list(selected_years)
 	layout.update(xaxis=dict(tickvals=years_ticks, ticktext=years_ticks, tickfont=dict(size=8)))
@@ -247,8 +224,8 @@ app.layout = html.Div([
 		],
 		value='PACASMAYO'
 	),
-	
-	html.Br(), 
+
+	html.Br(),
 
 	html.Label("Selecione os anos:"),
 	dcc.RangeSlider(
@@ -259,9 +236,9 @@ app.layout = html.Div([
 		marks={i: str(i) for i in range(1993, 2024)},
 		value=[1993, 2023]
 	),
-	
 
-	html.Br(), 
+
+	html.Br(),
 
 
 	# Envolver os gráficos em uma linha
@@ -269,11 +246,11 @@ app.layout = html.Div([
 		dcc.Graph(id='monthly-stats-plot-alt', style={'display': 'inline-block', 'width': '32%'}),
 
 		dcc.Graph(id='monthly-stats-plot-dir', style={'display': 'inline-block', 'width': '32%'}),
-		
+
 		dcc.Graph(id='monthly-stats-plot-per', style={'display': 'inline-block', 'width': '32%'}),
 	]),
-	
-	
+
+
 	html.Label("Selecione o mês:"),
 	dcc.Dropdown(
 		id='month-dropdown',
@@ -288,11 +265,11 @@ app.layout = html.Div([
 		dcc.Graph(id='annual-stats-plot-alt', style={'display': 'inline-block', 'width': '32%'}),
 
 		dcc.Graph(id='annual-stats-plot-dir', style={'display': 'inline-block', 'width': '32%'}),
-		
+
 		dcc.Graph(id='annual-stats-plot-per', style={'display': 'inline-block', 'width': '32%'}),
 	]),
-	
-	
+
+
 ])
 
 
@@ -312,7 +289,7 @@ app.layout = html.Div([
 )
 
 def update_plots(selected_location, selected_years, selected_month):
-	
+
 	# Carregar dados
 	df = load_data(selected_location, list(range(selected_years[0], selected_years[1] + 1)))
 
@@ -321,14 +298,14 @@ def update_plots(selected_location, selected_years, selected_month):
 	labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
 	parametro = 'VHM0'
 	nome_parametro = 'Altura significativa (m)'
-	
+
 	#bin_color_map = {
 	#'< 1,0': 'rgb(217,195,26)',
 	#'1,0-1,5': 'rgb(162,146,73)',
 	#'1,5-2,0': 'rgb(84,85,86)',
 	#'2,0-2,5': 'rgb(32,44,78)',
 	#'> 2,5': 'rgb(0,9,54)'}
-	
+
 	bin_color_map = {
 	'< 1,0': 'rgb(207,159,0)',
 	'1,0-1,5': 'rgb(190,96,0)',
@@ -344,7 +321,7 @@ def update_plots(selected_location, selected_years, selected_month):
 	labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 	parametro = 'CardinalDirection'
 	nome_parametro = 'Direção de onda'
-	
+
 	bin_color_map = {
 	'N': 'rgb(24,0,33)',
 	'NE': 'rgb(60,15,111)',
@@ -354,8 +331,8 @@ def update_plots(selected_location, selected_years, selected_month):
 	'SW': 'rgb(171,135,111)',
 	'W': 'rgb(148,64,54)',
 	'NW': 'rgb(109,15,51)'}
-	
-	
+
+
 	fig2 = plot_monthly_stats(df, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
 	fig5 = plot_annual_stats(df,list(range(selected_years[0], selected_years[1] + 1)), selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
 
@@ -364,7 +341,7 @@ def update_plots(selected_location, selected_years, selected_month):
 	labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
 	parametro = 'VTPK'
 	nome_parametro = 'Período de pico (s)'
-	
+
 	bin_color_map = {
 	'< 8': 'rgb(255,255,229)',
 	'8-10': 'rgb(243,250,182)',
@@ -372,13 +349,13 @@ def update_plots(selected_location, selected_years, selected_month):
 	'12-14': 'rgb(159,215,136)',
 	'14-16': 'rgb(66,171,93)',
 	'> 16': 'rgb(0,69,41)'}
-	
+
 	fig3 = plot_monthly_stats(df, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
 	fig6 = plot_annual_stats(df, list(range(selected_years[0], selected_years[1] + 1)), selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
-	
-	
+
+
 	#fig4 = analyze_and_visualize_data_dash(df)
-	
+
 	#fig5 = plot_annual_stats(df, selected_month, bins, labels, parametro, nome_parametro)
 
 	return fig1, fig2, fig3, fig4, fig5, fig6
