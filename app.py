@@ -21,9 +21,10 @@ import numpy as np
 
 import fsspec
 import requests
+import os
 
 app = dash.Dash(__name__)
-
+server = app.server
 
 # Função para converter direções numéricas em direções cardinais
 def convert_to_cardinal(direction_numeric):
@@ -48,9 +49,30 @@ def load_data(location, years):
 
 	for year in years:
 		#filename = f"http://hpgregorio.net/nc_ondas/ONDAS_{location}_{year}.nc"
-		filename = f"ONDAS_{location}_{year}.nc"
-		file = fsspec.open(filename)
+		#filename = f"ONDAS_{location}_{year}.nc"
+		#file = fsspec.open(filename)
 		#dataset = xr.open_dataset(file.open())
+		#dataset = xr.open_dataset(filename)
+		
+		
+		
+		filename = f"ONDAS_{location}_{year}.nc"
+
+		# Verifica se o arquivo está presente localmente
+		if not os.path.exists(filename):
+			remote_url = f"http://hpgregorio.net/dados_ondas/{filename}"
+
+			# Tenta baixar o arquivo remotamente
+			try:
+				response = requests.get(remote_url)
+				response.raise_for_status()  # Lança um erro se a solicitação não for bem-sucedida
+
+				with open(filename, 'wb') as f:
+					f.write(response.content)
+			except requests.exceptions.RequestException as e:
+				print(f"Erro ao baixar o arquivo {filename}: {e}")
+				continue
+
 		dataset = xr.open_dataset(filename)
 		
 
