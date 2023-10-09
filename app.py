@@ -48,7 +48,8 @@ def load_data(location, years):
 	dataframes_list = []
 
 	for year in years:
-		filename = f"https://hpgregorio.net/nc_ondas/ONDAS_{location}_{year}.nc"
+		#filename = f"https://hpgregorio.net/nc_ondas/ONDAS_{location}_{year}.nc"
+		filename = f"ONDAS_{location}_{year}.nc"
 
 		dataset = xr.open_dataset(filename)
 
