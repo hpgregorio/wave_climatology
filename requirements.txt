@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 dash
 dash_bootstrap_components
 pandas
@@ -10,3 +11,17 @@ numpy
 fsspec
 requests
 os
+=======
+dash
+dash_bootstrap_components
+pandas
+datetime
+xarray
+seaborn
+matplotlib
+plotly
+numpy
+fsspec
+requests
+gunicorn
+>>>>>>> bd60fe2f8301d6beaaa9732b9e366b0a08facd02
