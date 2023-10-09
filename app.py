@@ -23,7 +23,7 @@ import fsspec
 import requests
 
 app = dash.Dash(__name__)
-
+server = app.server
 
 # Função para converter direções numéricas em direções cardinais
 def convert_to_cardinal(direction_numeric):
