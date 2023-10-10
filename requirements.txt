@@ -10,3 +10,4 @@ numpy
 fsspec
 requests
 os
+gunicorn
