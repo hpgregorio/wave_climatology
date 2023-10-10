@@ -9,5 +9,4 @@ plotly
 numpy
 fsspec
 requests
-os
 gunicorn
