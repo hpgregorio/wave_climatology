@@ -26,57 +26,19 @@ import os
 app = dash.Dash(__name__)
 server = app.server
 
-# Função para converter direções numéricas em direções cardinais
-def convert_to_cardinal(direction_numeric):
-	cardinal_directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-	dir_grid = np.arange(-22.5, 360, 45)
-	dir_grid[0] = 360 - 22.5
-
-	index = np.searchsorted(dir_grid, direction_numeric, side='right') - 1
-
-	# Corrigir para valores próximos a 360
-	if direction_numeric > 337.5 or direction_numeric < 0.0:
-		index = 0
-
-	index = np.clip(index, 0, len(cardinal_directions) - 1)
-
-	return cardinal_directions[index]
-
-
-
 def load_data(location, years):
-	dataframes_list = []
+    dataframes_list = []
 
-	for year in years:
-		#filename = f"https://hpgregorio.net/nc_ondas/ONDAS_{location}_{year}.nc"
-		filename = f"ONDAS_{location}_{year}.nc"
+    for year in years:
+        filename_csv = f"https://hpgregorio.net/cvs_ondas/ONDAS_{location}_{year}.csv"
+        df = pd.read_csv(filename_csv)
+		
+        df['Datetime'] = pd.to_datetime(df['Datetime'])
 
-		dataset = xr.open_dataset(filename)
+        dataframes_list.append(df)
 
-
-
-		start_date = datetime(year, 1, 1, 0, 0)
-		time_steps = dataset.dims['time']
-		time_array = [start_date + timedelta(hours=3 * i) for i in range(time_steps)]
-
-		df = pd.DataFrame({
-			'Datetime': time_array,
-			'VHM0': dataset['VHM0'].squeeze().values,
-			'VMDR': dataset['VMDR'].squeeze().values,
-			'VTPK': dataset['VTPK'].squeeze().values
-		})
-
-		# Converter direções numéricas para direções cardinais
-		df['CardinalDirection'] = df['VMDR'].apply(convert_to_cardinal)
-
-		dataframes_list.append(df)
-		dataset.close()
-
-	return pd.concat(dataframes_list, ignore_index=True)
-
-
-
-
+    return pd.concat(dataframes_list, ignore_index=True)
+	
 # Função para plotar distribuição mensal de altura
 def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map):
 	# Criando uma coluna no dataframe para representar o intervalo de altura
@@ -92,9 +54,9 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 	height_distribution_percentage = height_distribution.div(height_distribution.sum(axis=1), axis=0) * 100
 
 	# Obtendo os nomes dos meses
-	month_names = ['Jan', 'Fev', 'Mar' , 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-	title_years = f"{selected_years[0]} a {selected_years[-1]}"
+	title_years = f"{selected_years[0]} to {selected_years[-1]}"
 
 	# Criando o gráfico de barras empilhadas com Plotly
 	traces = []
@@ -109,7 +71,7 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 
 	layout = go.Layout(
 		title=f'{nome_parametro} - {title_years}',
-		yaxis=dict(title='Frequência de ocorrência (%)', range=[0, 100]),
+		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		legend=dict(title='', font=dict(size=12)),
 		barmode='stack',
 		height=400,
@@ -138,7 +100,7 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 
 	years = list(selected_years)  # Converter para lista
 
-	month_names = ['Janeiro', 'Fevereiro', 'Março' , 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 	title_month = f"{month_names[mes-1]}"
 
@@ -154,7 +116,7 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 
 	layout = go.Layout(
 		title=f'{nome_parametro} - {title_month}',
-		yaxis=dict(title='Frequência de ocorrência (%)', range=[0, 100]),
+		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		legend=dict(title='', font=dict(size=12)),
 		barmode='stack',
 		height=400,
@@ -174,6 +136,57 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 
 
 
+
+
+
+
+
+
+
+
+
+def plot_custom_conditions_frequency(df, conditions, selected_years):
+	# Criando uma coluna para verificar se cada linha atende às condições
+	df['ConditionMet'] = False
+
+	for condition_set in conditions:
+		# Verificando se há pelo menos uma condição no conjunto
+		if any(condition_set.values()):
+			condition_met_set = (df['VHM0'] >= condition_set['altura']) & (df['VTPK'] >= condition_set['periodo'])
+			if condition_set['direcao'] is not None:
+				if condition_set['direcao']:
+					condition_met_set &= (df['CardinalDirection'] == condition_set['direcao'])
+
+			# Considerando "E" dentro do conjunto de condições
+			df['ConditionMet'] |= condition_met_set
+
+	# Agrupando por mês e contando o número de ocorrências onde as condições foram atendidas
+	monthly_condition_counts = df.groupby(df['Datetime'].dt.month)['ConditionMet'].sum()
+
+	# Calculando a porcentagem de ocorrências atendendo às condições para cada mês
+	monthly_condition_percentage = (monthly_condition_counts / df.groupby(df['Datetime'].dt.month)['ConditionMet'].count()) * 100
+
+	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+	title_years = f"{selected_years[0]} to {selected_years[-1]}"
+	# Criando o gráfico de barras
+	trace = go.Bar(
+		x=month_names,
+		y=monthly_condition_percentage,
+		marker=dict(color='rgb(67, 78, 150)')
+	)
+
+	layout = go.Layout(
+		title=f'Occurency according with the conditions - {title_years}',
+		yaxis=dict(title='Occurency (%)', range=[0, 100]),
+		plot_bgcolor='white',
+		yaxis_gridcolor='lightgray',
+		yaxis_gridwidth=0.0001,
+		height=400,
+		width=600,
+	)
+
+	fig = go.Figure(data=[trace], layout=layout)
+	return fig
 
 
 
@@ -209,26 +222,27 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 # Layout da aplicação
 app.layout = html.Div([
 #	html.H1("Ondas"),
-	html.Label("Selecione o local:"),
+	html.Label("Location:"),
 	dcc.Dropdown(
 		id='location-dropdown',
 		options=[
-			{'label': 'COSTA RICA (NORTE - 10.1N 85.9W)', 'value': 'CRICANORTE'},
-			{'label': 'COSTA RICA (SUL - 8.1N 83.2W)', 'value': 'CRICASUL'},
+			{'label': 'BRAZIL (SÃO SEBASTIÃO - 24.4S 45.5W)', 'value': 'SAOSEBASTIAO'},
+			{'label': 'BRAZIL (JERICOACOARA - 2.77S 40.52W)', 'value': 'JERICOACOARA'},
+			{'label': 'COSTA RICA (GUANACASTE - 10.1N 85.9W)', 'value': 'CRICANORTE'},
+			{'label': 'COSTA RICA (PENINSULA OSA - 8.1N 83.2W)', 'value': 'CRICASUL'},
 			{'label': 'EL SALVADOR (EL TUNCO - 13N 89.4W)', 'value': 'ELSALVADOR'},
 			{'label': 'MARROCOS (SIDI KAOKI - 30.55N 9.9W)', 'value': 'MARROCOSKAOKI'},
 			{'label': 'MARROCOS (TAGHAZOUT - 30.4N 9.8W)', 'value': 'MARROCOSTAGHAZOUT'},
 			{'label': 'MARROCOS (MIRLEFT - 29.5N 10.2W)', 'value': 'MARROCOSMIRLEFT'},
-			{'label': 'SÃO SEBASTIÃO (24.4S 45.5W)', 'value': 'SAOSEBASTIAO'},
-			{'label': 'PACASMAYO (7.4S 79.8W)', 'value': 'PACASMAYO'}
+			{'label': 'PERU (PACASMAYO - 7.4S 79.8W)', 'value': 'PACASMAYO'}
 			# Adicione mais opções de local conforme necessário
 		],
-		value='PACASMAYO'
+		value='SAOSEBASTIAO'
 	),
 
 	html.Br(),
 
-	html.Label("Selecione os anos:"),
+	html.Label("Years selection:"),
 	dcc.RangeSlider(
 		id='year-slider',
 		min=1993,
@@ -252,14 +266,54 @@ app.layout = html.Div([
 	]),
 
 
-	html.Label("Selecione o mês:"),
-	dcc.Dropdown(
-		id='month-dropdown',
-		options=[
-			{'label': month, 'value': i+1} for i, month in enumerate(['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'])
-		],
-		value=1
-	),
+
+
+
+
+	# Layout para as condições
+	html.Div([
+		html.Div([
+			html.Label("Condition 1:"),
+			dcc.Input(id='altura1', type='number', placeholder='Height'),
+			dcc.Input(id='periodo1', type='number', placeholder='Period'),
+			dcc.Input(id='direcao1', type='text', placeholder='Direction (none = ALL)'),
+		], style={'width': '32%', 'display': 'inline-block'}),
+
+		html.Div([
+			html.Label("OR Condition 2:"),
+			dcc.Input(id='altura2', type='number', placeholder='Height'),
+			dcc.Input(id='periodo2', type='number', placeholder='Period'),
+			dcc.Input(id='direcao2', type='text', placeholder='Direction (none = ALL)'),
+		], style={'width': '32%', 'display': 'inline-block'}),
+
+		html.Div([
+			html.Label("OR Condition 3:"),
+			dcc.Input(id='altura3', type='number', placeholder='Height'),
+			dcc.Input(id='periodo3', type='number', placeholder='Period'),
+			dcc.Input(id='direcao3', type='text', placeholder='Direction (none = ALL)'),
+		], style={'width': '32%', 'display': 'inline-block'}),
+	], style={'width': '32%', 'float': 'left'}),
+
+
+	dcc.Graph(id='custom-conditions-plot', style={'display': 'inline-block', 'width': '32%'}),
+	
+
+	html.Br(),
+
+	# Dropdown "Selecione o mês"
+	html.Div([
+		html.Div([
+			html.Label("Select the month:"),
+			dcc.Dropdown(
+				id='month-dropdown',
+				options=[
+					{'label': month, 'value': i+1} for i, month in enumerate(['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])
+				],
+				value=1,
+				style={'width': '100%', 'display': 'inline-block'}
+			),
+		]),
+	]),
 
 	# Gráficos anuais
 	html.Div([
@@ -280,16 +334,26 @@ app.layout = html.Div([
 	[Output('monthly-stats-plot-alt', 'figure'),
 	 Output('monthly-stats-plot-dir', 'figure'),
 	 Output('monthly-stats-plot-per', 'figure'),
-	 #Output('matrix', 'figure'),
+	 Output('custom-conditions-plot', 'figure'),
 	 Output('annual-stats-plot-alt', 'figure'),
 	 Output('annual-stats-plot-dir', 'figure'),
 	 Output('annual-stats-plot-per', 'figure')],
 	[Input('location-dropdown', 'value'),
 	 Input('year-slider', 'value'),
-	 Input('month-dropdown', 'value')]
+	 Input('month-dropdown', 'value'),
+	 Input('altura1', 'value'),
+	 Input('periodo1', 'value'),
+	 Input('direcao1', 'value'),
+	 Input('altura2', 'value'),
+	 Input('periodo2', 'value'),
+	 Input('direcao2', 'value'),
+	 Input('altura3', 'value'),
+	 Input('periodo3', 'value'),
+	 Input('direcao3', 'value')]
 )
 
-def update_plots(selected_location, selected_years, selected_month):
+
+def update_plots(selected_location, selected_years, selected_month,altura1, periodo1, direcao1,altura2, periodo2, direcao2,altura3, periodo3, direcao3):
 
 	# Carregar dados
 	df = load_data(selected_location, list(range(selected_years[0], selected_years[1] + 1)))
@@ -298,7 +362,7 @@ def update_plots(selected_location, selected_years, selected_month):
 	bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
 	labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
 	parametro = 'VHM0'
-	nome_parametro = 'Altura significativa (m)'
+	nome_parametro = 'Significant Wave Height (m)'
 
 	#bin_color_map = {
 	#'< 1,0': 'rgb(217,195,26)',
@@ -321,7 +385,7 @@ def update_plots(selected_location, selected_years, selected_month):
 	bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 	labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 	parametro = 'CardinalDirection'
-	nome_parametro = 'Direção de onda'
+	nome_parametro = 'Wave direction'
 
 	bin_color_map = {
 	'N': 'rgb(24,0,33)',
@@ -341,7 +405,7 @@ def update_plots(selected_location, selected_years, selected_month):
 	bins = [0, 8, 10, 12, 14, 16, float('inf')]
 	labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
 	parametro = 'VTPK'
-	nome_parametro = 'Período de pico (s)'
+	nome_parametro = 'Peak wave period (s)'
 
 	bin_color_map = {
 	'< 8': 'rgb(255,255,229)',
@@ -355,11 +419,16 @@ def update_plots(selected_location, selected_years, selected_month):
 	fig6 = plot_annual_stats(df, list(range(selected_years[0], selected_years[1] + 1)), selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
 
 
-	#fig4 = analyze_and_visualize_data_dash(df)
+	
+	# Condições do usuário
+	conditions = [{'altura': altura1, 'periodo': periodo1, 'direcao': direcao1},
+	{'altura': altura2, 'periodo': periodo2, 'direcao': direcao2},
+	{'altura': altura3, 'periodo': periodo3, 'direcao': direcao3}]
+	
+	fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, list(range(selected_years[0], selected_years[1] + 1)))
+	
 
-	#fig5 = plot_annual_stats(df, selected_month, bins, labels, parametro, nome_parametro)
-
-	return fig1, fig2, fig3, fig4, fig5, fig6
+	return fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6
 
 # ...
 
