@@ -77,7 +77,7 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 		legend=dict(title='', font=dict(size=10)),
 		barmode='stack',
 		height=350,
-		width=500,
+		width=400,
 		plot_bgcolor='white',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
@@ -122,7 +122,7 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 		legend=dict(title='', font=dict(size=10)),
 		barmode='stack',
 		height=350,
-		width=500,
+		width=400,
 		plot_bgcolor='white',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
@@ -173,7 +173,7 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001,
 		height=350,
-		width=500,
+		width=400,
 	)
 
 	fig = go.Figure(data=[trace], layout=layout)
