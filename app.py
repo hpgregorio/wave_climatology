@@ -28,21 +28,20 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP,dbc.themes.SPACELAB,d
 server = app.server
 
 def load_data(location, years):
-    dataframes_list = []
+	dataframes_list = []
 
-    for year in years:
-        filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-        #filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+	for year in years:
+		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+		#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
-        df = pd.read_csv(filename_csv)
+		df = pd.read_csv(filename_csv)
 		
-        df['Datetime'] = pd.to_datetime(df['Datetime'])
+		df['Datetime'] = pd.to_datetime(df['Datetime'])
 
-        dataframes_list.append(df)
+		dataframes_list.append(df)
 
-    return pd.concat(dataframes_list, ignore_index=True)
+	return pd.concat(dataframes_list, ignore_index=True)
 	
-# Função para plotar distribuição mensal de altura
 def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map):
 	# Criando uma coluna no dataframe para representar o intervalo de altura
 	if parametro == 'CardinalDirection':
@@ -77,8 +76,8 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		legend=dict(title='', font=dict(size=10)),
 		barmode='stack',
-		height=450,
-		width=600,
+		height=350,
+		width=500,
 		plot_bgcolor='white',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
@@ -122,8 +121,8 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		legend=dict(title='', font=dict(size=10)),
 		barmode='stack',
-		height=450,
-		width=600,
+		height=350,
+		width=500,
 		plot_bgcolor='white',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
@@ -136,17 +135,6 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 	fig = go.Figure(data=traces, layout=layout)
 
 	return fig
-
-
-
-
-
-
-
-
-
-
-
 
 def plot_custom_conditions_frequency(df, conditions, selected_years):
 	# Criando uma coluna para verificar se cada linha atende às condições
@@ -184,8 +172,8 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 		plot_bgcolor='white',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001,
-		height=450,
-		width=600,
+		height=350,
+		width=500,
 	)
 
 	fig = go.Figure(data=[trace], layout=layout)
@@ -196,21 +184,21 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 
 
 
+def load_data_wind(location, years):
+	dataframes_list = []
 
+	for year in years:
+		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+		#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+		
+		df = pd.read_csv(filename_csv)
+		
+		df['Datetime'] = pd.to_datetime(df['Datetime'])
 
+		dataframes_list.append(df)
 
-
-
-
-
-
-
-
-
-
-
-
-
+	return pd.concat(dataframes_list, ignore_index=True)
+	
 
 
 
@@ -247,111 +235,43 @@ app.layout = dbc.Container([
 		value=[1993, 2023]
 	),
 
-
 	dbc.Tabs([
 		dbc.Tab(label="Waves", tab_id="waves"),
 		dbc.Tab(label="Wind", tab_id="wind"),
 		dbc.Tab(label="Othes", tab_id="others"),
-            ],
-            id="tabs",
-            active_tab="waves",
-            style={'width': '100%', 'border': 'none'}
-        ),
-        html.Div(id="tab-content", className="p-4"),
-    ]
-)
+	],
+	id="tabs",
+	active_tab="waves",
+	),
 
 
-app.layout = dbc.Container([
-    html.Label("Location:"),
-    dcc.Dropdown(
-        id='location-dropdown',
-        options=[
-			{'label': 'BRAZIL (JERICOACOARA - 2.77S 40.52W)', 'value': 'JERICOACOARA'},
-			{'label': 'BRAZIL (SÃO SEBASTIÃO - 24.4S 45.5W)', 'value': 'SAOSEBASTIAO'},
-			{'label': 'BRAZIL (SANTOS/GUARUJÁ - 24.15S 46.2W)', 'value': 'SANTOSGUARUJA'},			
-			{'label': 'COSTA RICA (GUANACASTE - 10.1N 85.9W)', 'value': 'CRICANORTE'},
-			{'label': 'COSTA RICA (PENINSULA OSA - 8.1N 83.2W)', 'value': 'CRICASUL'},
-			{'label': 'EL SALVADOR (EL TUNCO - 13N 89.4W)', 'value': 'ELSALVADOR'},
-			{'label': 'MARROCOS (SIDI KAOKI - 30.55N 9.9W)', 'value': 'MARROCOSKAOKI'},
-			{'label': 'MARROCOS (TAGHAZOUT - 30.4N 9.8W)', 'value': 'MARROCOSTAGHAZOUT'},
-			{'label': 'MARROCOS (MIRLEFT - 29.5N 10.2W)', 'value': 'MARROCOSMIRLEFT'},
-			{'label': 'PERU (PACASMAYO - 7.4S 79.8W)', 'value': 'PACASMAYO'}
-			# Adicione mais opções de local conforme necessário
-		],
-        value='SAOSEBASTIAO'
-    ),
-
-    html.Br(),
-
-    html.Label("Years selection:"),
-    dcc.RangeSlider(
-        id='year-slider',
-        min=1993,
-        max=2023,
-        step=1,
-        marks={i: str(i) for i in range(1993, 2024)},
-        value=[1993, 2023]
-    ),
-
-    dbc.Tabs([
-        dbc.Tab(label="Waves", tab_id="waves"),
-        dbc.Tab(label="Wind", tab_id="wind"),
-        dbc.Tab(label="Others", tab_id="others"),
-    ],
-        id="tabs",
-        active_tab="waves",
-    ),
-
-    html.Div(id="tab-content", className="p-4"),
-
-    dbc.Tab(label="Waves", tab_id="waves"),
-    dbc.Tab(label="Wind", tab_id="wind"),
-    dbc.Tab(label="Others", tab_id="others"),
-	
-	
-    html.Div([
-        dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}),
-        dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}),
-        dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}),
-    ], id="waves-content"),
-	
-	
-	
-
-
-
-
-
-	# Layout para as condições
 	html.Div([
-		html.Label("Condition 1:"),
-		dcc.Input(id='altura1', type='number', placeholder='Height'),
-		dcc.Input(id='periodo1', type='number', placeholder='Period'),
-		dcc.Input(id='direcao1', type='text', placeholder='Direction (none = ALL)'),
-	], style={'width': '100%'}),
-	html.Div([
-		html.Label("OR Condition 2:"),
-		dcc.Input(id='altura2', type='number', placeholder='Height'),
-		dcc.Input(id='periodo2', type='number', placeholder='Period'),
-		dcc.Input(id='direcao2', type='text', placeholder='Direction (none = ALL)'),
-	], style={'width': '100%'}),
-    html.Div([
-		html.Label("OR Condition 3:"),
-		dcc.Input(id='altura3', type='number', placeholder='Height'),
-		dcc.Input(id='periodo3', type='number', placeholder='Period'),
-		dcc.Input(id='direcao3', type='text', placeholder='Direction (none = ALL)'),
-	], style={'width': '100%'}),
+		dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}),
+		dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}),
+		dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}),
+		
+			# Layout para as condições
+		html.Div([
+			html.Label("Condition 1:"),
+			dcc.Input(id='altura1', type='number', placeholder='Height'),
+			dcc.Input(id='periodo1', type='number', placeholder='Period'),
+			dcc.Input(id='direcao1', type='text', placeholder='Direction (none = ALL)'),
+		], style={'width': '100%'}),
+		html.Div([
+			html.Label("OR Condition 2:"),
+			dcc.Input(id='altura2', type='number', placeholder='Height'),
+			dcc.Input(id='periodo2', type='number', placeholder='Period'),
+			dcc.Input(id='direcao2', type='text', placeholder='Direction (none = ALL)'),
+		], style={'width': '100%'}),
+		html.Div([
+			html.Label("OR Condition 3:"),
+			dcc.Input(id='altura3', type='number', placeholder='Height'),
+			dcc.Input(id='periodo3', type='number', placeholder='Period'),
+			dcc.Input(id='direcao3', type='text', placeholder='Direction (none = ALL)'),
+		], style={'width': '100%'}),
 	
-
-
-	dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}),
-	
-
-	html.Br(),
-
-	# Dropdown "Selecione o mês"
-	html.Div([
+		dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}),
+		
 		html.Div([
 			html.Label("Select the month:"),
 			dcc.Dropdown(
@@ -363,64 +283,83 @@ app.layout = dbc.Container([
 				style={'width': '100%', 'display': 'inline-block'}
 			),
 		]),
-	]),
-
-	# Gráficos anuais
-	html.Div([
+		
 		dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}),
-
 		dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}),
-
 		dcc.Graph(id='annual-stats-plot-per', style={'width': '100%'}),
-	], id="waves-annual-plot"),
-
-
+	], id="waves-content", style={'display': 'block'}),
+	
+	
+	html.Div([
+		dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}),
+		dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}),
+	
+		html.Div([
+			html.Label("Select the month:"),
+			dcc.Dropdown(
+				id='month-dropdown_wind',
+				options=[
+					{'label': month, 'value': i+1} for i, month in enumerate(['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])
+				],
+				value=1,
+				style={'width': '100%', 'display': 'inline-block'}
+			),
+		]),
+		
+		dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}),
+		dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}),
+	], id="wind-content", style={'display': 'none'}),	
+		
+		
 ])
 
 
 
-# Callbacks para atualizar os gráficos
+# Callbacks para atualizar os gráficos e a guia ativa
 @app.callback(
-	[Output('monthly-stats-plot-alt', 'figure'),
-	 Output('monthly-stats-plot-dir', 'figure'),
-	 Output('monthly-stats-plot-per', 'figure'),
-	 Output('custom-conditions-plot', 'figure'),
-	 Output('annual-stats-plot-alt', 'figure'),
-	 Output('annual-stats-plot-dir', 'figure'),
-	 Output('annual-stats-plot-per', 'figure')],
-	[Input('location-dropdown', 'value'),
-	 Input('year-slider', 'value'),
-	 Input('month-dropdown', 'value'),
-	 Input('altura1', 'value'),
-	 Input('periodo1', 'value'),
-	 Input('direcao1', 'value'),
-	 Input('altura2', 'value'),
-	 Input('periodo2', 'value'),
-	 Input('direcao2', 'value'),
-	 Input('altura3', 'value'),
-	 Input('periodo3', 'value'),
-	 Input('direcao3', 'value')],
-	 [State("tabs", "active_tab")] 
+    [Output('monthly-stats-plot-alt', 'figure'),
+     Output('monthly-stats-plot-dir', 'figure'),
+     Output('monthly-stats-plot-per', 'figure'),
+     Output('custom-conditions-plot', 'figure'),
+     Output('annual-stats-plot-alt', 'figure'),
+     Output('annual-stats-plot-dir', 'figure'),
+     Output('annual-stats-plot-per', 'figure'),
+     Output('monthly-stats-plot-int_wind', 'figure'),
+	 Output('monthly-stats-plot-dir_wind', 'figure'),
+	 Output('annual-stats-plot-int_wind', 'figure'),
+	 Output('annual-stats-plot-dir_wind', 'figure'),
+     Output("tabs", "active_tab"),
+     Output('waves-content', 'style'),
+     Output('wind-content', 'style')],
+    [Input('location-dropdown', 'value'),
+     Input('year-slider', 'value'),
+     Input('month-dropdown', 'value'),
+	 Input('month-dropdown_wind', 'value'),
+     Input('altura1', 'value'),
+     Input('periodo1', 'value'),
+     Input('direcao1', 'value'),
+     Input('altura2', 'value'),
+     Input('periodo2', 'value'),
+     Input('direcao2', 'value'),
+     Input('altura3', 'value'),
+     Input('periodo3', 'value'),
+     Input('direcao3', 'value'),
+     Input("tabs", "active_tab")]
 )
+	
+   
 
-
-def update_plots(selected_location, selected_years, selected_month,altura1, periodo1, direcao1,altura2, periodo2, direcao2,altura3, periodo3, direcao3, active_tab):
+def update_plots(selected_location, selected_years, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab):
 
 	# Carregar dados
 	df = load_data(selected_location, list(range(selected_years[0], selected_years[1] + 1)))
+	df_wind = load_data_wind(selected_location, list(range(selected_years[0], selected_years[1] + 1)))
 
 	if active_tab == "waves":
 		bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
 		labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
 		parametro = 'VHM0'
 		nome_parametro = 'Significant Wave Height (m)'
-
-		#bin_color_map = {
-		#'< 1,0': 'rgb(217,195,26)',
-		#'1,0-1,5': 'rgb(162,146,73)',
-		#'1,5-2,0': 'rgb(84,85,86)',
-		#'2,0-2,5': 'rgb(32,44,78)',
-		#'> 2,5': 'rgb(0,9,54)'}
 
 		bin_color_map = {
 		'< 1,0': 'rgb(207,159,0)',
@@ -479,9 +418,65 @@ def update_plots(selected_location, selected_years, selected_month,altura1, peri
 		fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, list(range(selected_years[0], selected_years[1] + 1)))
 		
 
-		return fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6
+		return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}]
 
-# ...
+
+	if active_tab == "wind":
+		bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
+		labels = ['< 6', '6-12', '12-15', '15-18', '18-21', '21-25', '25-30', '> 30']
+		parametro = 'int'
+		nome_parametro = 'Wind speed (knots)'
+
+		bin_color_map = {
+		'< 6': 'rgb(165,218,240)',
+		'6-12': 'rgb(48,108,142)',
+		'12-15': 'rgb(0,255,0)',
+		'15-18': 'rgb(241,230,78)',
+		'18-21': 'rgb(255,100,44)',
+		'21-25': 'rgb(255,10,40)',
+		'25-30': 'rgb(255,0,255)',
+		'> 30': 'rgb(143,10,40)'}
+
+		fig1_w = plot_monthly_stats(df_wind, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
+		fig4_w = plot_annual_stats(df_wind, list(range(selected_years[0], selected_years[1] + 1)), selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+		
+		
+		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+		labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+		parametro = 'CardinalDirection'
+		nome_parametro = 'Wind direction'
+
+		bin_color_map = {
+		'N': 'rgb(24,0,33)',
+		'NE': 'rgb(60,15,111)',
+		'E': 'rgb(67,78,150)',
+		'SE': 'rgb(102,138,162)',
+		'S': 'rgb(181,180,186)',
+		'SW': 'rgb(171,135,111)',
+		'W': 'rgb(148,64,54)',
+		'NW': 'rgb(109,15,51)'}
+
+
+		fig2_w = plot_monthly_stats(df_wind, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
+		fig5_w = plot_annual_stats(df_wind,list(range(selected_years[0], selected_years[1] + 1)), selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+		
+
+		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, fig2_w, fig4_w, fig5_w, active_tab, {'display': 'none'}, {'display': 'block'}]
+
+
+	else:
+		# Se active_tab não for "waves" nem "wind", retorne figuras vazias
+		return [go.Figure()] * 8 + [active_tab, {'display': 'none'}, {'display': 'none'}]
+
+
+
+def update_tab(tab):
+	return tab
+
+
+
+
+
 
 if __name__ == '__main__':
 	app.run_server(debug=True)
