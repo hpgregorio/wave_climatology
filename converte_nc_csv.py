@@ -51,15 +51,7 @@ def convert_nc_to_csv(location, years):
 
 # Localizações e anos desejados
 locations = [
-    'SAOSEBASTIAO',
-    'JERICOACOARA',
-    'CRICANORTE',
-    'CRICASUL',
-    'ELSALVADOR',
-    'MARROCOSKAOKI',
-    'MARROCOSTAGHAZOUT',
-    'MARROCOSMIRLEFT',
-    'PACASMAYO'
+    'SANTOSGUARUJA'
 ]
 
 years = list(range(1993, 2024))
