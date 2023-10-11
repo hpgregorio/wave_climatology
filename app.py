@@ -31,8 +31,8 @@ def load_data(location, years):
     dataframes_list = []
 
     for year in years:
-        #filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ONDAS_{location}_{year}.csv"
-        filename_csv = f"ONDAS_{location}_{year}.csv"
+        filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ONDAS_{location}_{year}.csv"
+        #filename_csv = f"ONDAS_{location}_{year}.csv"
 		
         df = pd.read_csv(filename_csv)
 		
