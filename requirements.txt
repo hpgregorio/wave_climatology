@@ -1,12 +1,5 @@
 dash
 dash_bootstrap_components
 pandas
-datetime
-xarray
-seaborn
-matplotlib
 plotly
-numpy
-fsspec
-requests
 gunicorn
