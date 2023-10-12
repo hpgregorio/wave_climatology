@@ -30,8 +30,8 @@ def load_data(location, years):
 	dataframes_list = []
 
 	for year in years:
-		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-		#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+		filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -186,8 +186,8 @@ def load_data_wind(location, years):
 	dataframes_list = []
 
 	for year in years:
-		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-		#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+		filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -245,7 +245,7 @@ def plot_others(df, selected_years):
 		x=month_names,
 		y=monthly_sst_avg,
 		mode='lines+markers',
-		name='SST',
+		name='Sea Temp',
 		line=dict(color='rgb(220, 20, 60)'),
 		yaxis='y2'
 	)
