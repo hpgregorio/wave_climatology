@@ -23,15 +23,17 @@ import fsspec
 import requests
 
 
+
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP,dbc.themes.SPACELAB,dbc.icons.FONT_AWESOME])
 server = app.server
+
 
 def load_data(location, years):
 	dataframes_list = []
 
 	for year in years:
-		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-		filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+		#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -186,8 +188,8 @@ def load_data_wind(location, years):
 	dataframes_list = []
 
 	for year in years:
-		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-		filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+		#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -258,7 +260,100 @@ def plot_others(df, selected_years):
 	
 	
 	layout = go.Layout(
-		title=f'Air Temp, SST and Prec - {title_years}',
+		title=f'Air Temp, Sea Temp and Prec<br>- {title_years}',
+		yaxis=dict(title='Precipitation (mm/month)'),
+		yaxis2=dict(
+			title='Temperature (°C)',
+			overlaying='y',
+			side='right'
+		),
+		plot_bgcolor='white',
+		yaxis_gridcolor='lightgray',
+		yaxis_gridwidth=0.0001,
+		height=350,
+		width=400,
+		legend=dict(
+			x=0.1,
+			y=-0.15,
+			orientation='h',
+			bgcolor='rgba(255, 255, 255, 0.5)',
+			traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
+			bordercolor='rgba(255, 255, 255, 0)',  # Cor da borda da legenda (transparente)
+			borderwidth=0,  # Largura da borda da legenda
+			xanchor='left',  # Ancoragem horizontal no centro
+			yanchor='top'  # Ancoragem vertical no topo
+		)
+	)
+
+
+	fig = go.Figure(data=[trace_temp,trace_sst,trace_prec], layout=layout)
+	return fig
+
+
+
+
+def plot_with_custom_temps(df, selected_years, selected_hours):
+    # ...
+
+	df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
+	#df_selected_hours['temp'] = df['temp'][df['Datetime'].dt.hour.isin(selected_hours)]
+	df_selected_hours['Month'] = df_selected_hours['Datetime'].dt.month
+	df_selected_hours['Year'] = df_selected_hours['Datetime'].dt.year
+	
+	df['Month'] = df['Datetime'].dt.month
+	df['Year'] = df['Datetime'].dt.year
+	
+	monthly_temp_avg = df_selected_hours.groupby('Month')['temp'].mean()
+	monthly_sst_avg = df.groupby('Month')['sst'].mean()
+	
+	# Agrupe os dados por ano e mês, somando a coluna 'prec'
+	monthly_prec_sum = df.groupby(['Year', 'Month'])['prec'].sum().reset_index()
+	
+	# Calcule a média mensal ao longo dos anos
+	monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
+	monthly_prec_avg = monthly_prec_avg*1000 #transformar para mm/mês
+	
+	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+	title_years = f"{selected_years[0]} to {selected_years[-1]}"
+	
+	fig = go.Figure()
+	
+	# Adicione barras para precipitação primeiro
+	trace_prec = go.Bar(
+		x=month_names,
+		y=monthly_prec_avg['prec'],
+		name='Precipitation',
+		marker=dict(color='rgb(200, 200, 200)')
+	)
+
+	# Adicione os traços de linha
+	trace_temp = go.Scatter(
+		x=month_names,
+		y=monthly_temp_avg,
+		mode='lines+markers',
+		name='Air Temp',
+		line=dict(color='rgb(67, 78, 150)'),
+		yaxis='y2'
+	)
+
+	trace_sst = go.Scatter(
+		x=month_names,
+		y=monthly_sst_avg,
+		mode='lines+markers',
+		name='Sea Temp',
+		line=dict(color='rgb(220, 20, 60)'),
+		yaxis='y2'
+	)
+
+	# Adicione os traços ao gráfico
+	fig.add_trace(trace_prec)
+	fig.add_trace(trace_temp)
+	fig.add_trace(trace_sst)
+	
+	
+	
+	layout = go.Layout(
+		title=f'Air Temp, Sea Temp and Prec<br>- {title_years}',
 		yaxis=dict(title='Precipitation (mm/month)'),
 		yaxis2=dict(
 			title='Temperature (°C)',
@@ -292,6 +387,10 @@ def plot_others(df, selected_years):
 
 
 
+
+
+
+
 app.layout = dbc.Container([
 
 	html.Label("Location:"),
@@ -316,15 +415,22 @@ app.layout = dbc.Container([
 	html.Br(),
 
 	html.Label("Years selection:"),
-	dcc.RangeSlider(
-		id='year-slider',
-		min=1993,
-		max=2023,
-		step=1,
-		marks={i: str(i) for i in range(1993, 2024)},
-		value=[1993, 2023]
-	),
-
+	html.Div([
+		dcc.Dropdown(
+			id='start-year',
+			options=[{'label': str(i), 'value': i} for i in range(1993, 2024)],
+			value=1993,
+		),
+		html.Div(children='→', style={'margin': '0 10px'}),
+		dcc.Dropdown(
+			id='end-year',
+			options=[{'label': str(i), 'value': i} for i in range(1993, 2024)],
+			value=2023,
+		),
+	], style={'display': 'flex', 'alignItems': 'center'}),
+	
+	html.Br(),
+	
 	dbc.Tabs([
 		dbc.Tab(label="Waves", tab_id="waves"),
 		dbc.Tab(label="Wind", tab_id="wind"),
@@ -340,25 +446,25 @@ app.layout = dbc.Container([
 		dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}),
 		dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}),
 		
-			# Layout para as condições
+		# Layout para as condições
 		html.Div([
-			html.Label("Condition 1:  "),
+			html.Label("Cond. 1:		"),
 			dcc.Input(id='altura1', type='number', placeholder='Height', style={'maxWidth': '80px'}),
 			dcc.Input(id='periodo1', type='number', placeholder='Period', style={'maxWidth': '80px'}),
 			dcc.Input(id='direcao1', type='text', placeholder='Dir (none = ALL)', style={'maxWidth': '120px'}),
-		], style={'width': '100%'}),
+		], style={'width': '100%', 'white-space': 'pre'}),
 		html.Div([
-			html.Label("OR Condition 2:  "),
+			html.Label("OR Cond. 2:	"),
 			dcc.Input(id='altura2', type='number', placeholder='Height', style={'maxWidth': '80px'}),
 			dcc.Input(id='periodo2', type='number', placeholder='Period', style={'maxWidth': '80px'}),
 			dcc.Input(id='direcao2', type='text', placeholder='Dir (none = ALL)', style={'maxWidth': '120px'}),
-		], style={'width': '100%'}),
+		], style={'width': '100%', 'white-space': 'pre'}),
 		html.Div([
-			html.Label("OR Condition 3:  "),
+			html.Label("OR Cond. 3:	"),
 			dcc.Input(id='altura3', type='number', placeholder='Height', style={'maxWidth': '80px'}),
 			dcc.Input(id='periodo3', type='number', placeholder='Period', style={'maxWidth': '80px'}),
 			dcc.Input(id='direcao3', type='text', placeholder='Dir (none = ALL)', style={'maxWidth': '120px'}),
-		], style={'width': '100%'}),
+		], style={'width': '100%', 'white-space': 'pre'}),
 	
 		dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}),
 		
@@ -400,17 +506,35 @@ app.layout = dbc.Container([
 		dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}),
 	], id="wind-content", style={'display': 'none'}),	
 	
-	
-	
 	html.Div([
 		dcc.Graph(id='other_anual', style={'width': '100%'}),
+		html.Br(),
+		html.Br(),
+		html.Label("Select the time of the day to analyse"),
+		html.Br(),
+		html.Label("the air temperature (times in GMT!):"),
+
+		# Caixas de seleção para os horários
+		dcc.Checklist(
+			id='horarios-checklist',
+			options=[
+				{'label': ' 00h   ', 'value': 0},
+				{'label': ' 03h   ', 'value': 3},
+				{'label': ' 06h   ', 'value': 6},
+				{'label': ' 09h   ', 'value': 9},
+				{'label': ' 12h   ', 'value': 12},
+				{'label': ' 15h   ', 'value': 15},
+				{'label': ' 18h   ', 'value': 18}
+			],
+			value=[],  # Valor inicial, lista vazia
+			style={'white-space': 'pre'}  # Adiciona a propriedade CSS para preservar espaços
+		),
+	
+
+		dcc.Graph(id='other_anual_times', style={'width': '100%'}),
 	], id="others-content", style={'display': 'none'}),
-	
-	
-		
 		
 ])
-
 
 
 # Callbacks para atualizar os gráficos e a guia ativa
@@ -427,12 +551,15 @@ app.layout = dbc.Container([
 	 Output('annual-stats-plot-int_wind', 'figure'),
 	 Output('annual-stats-plot-dir_wind', 'figure'),
 	 Output('other_anual', 'figure'),
+	 #Output('horarios-checklist', 'value'),
+	 Output('other_anual_times', 'figure'),
 	 Output("tabs", "active_tab"),
 	 Output('waves-content', 'style'),
 	 Output('wind-content', 'style'),
-	 Output('others-content', 'style'),],
+	 Output('others-content', 'style')],
 	[Input('location-dropdown', 'value'),
-	 Input('year-slider', 'value'),
+	 Input('start-year', 'value'),
+	 Input('end-year', 'value'),
 	 Input('month-dropdown', 'value'),
 	 Input('month-dropdown_wind', 'value'),
 	 Input('altura1', 'value'),
@@ -444,16 +571,17 @@ app.layout = dbc.Container([
 	 Input('altura3', 'value'),
 	 Input('periodo3', 'value'),
 	 Input('direcao3', 'value'),
-	 Input("tabs", "active_tab")]
+	 Input("tabs", "active_tab"),
+	 Input('horarios-checklist', 'value')]
 )
-	
-   
 
-def update_plots(selected_location, selected_years, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab):
 
+def update_plots(selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours):
+
+	anos = list(range(start_year, end_year + 1))
 	# Carregar dados
-	df = load_data(selected_location, list(range(selected_years[0], selected_years[1] + 1)))
-	df_wind = load_data_wind(selected_location, list(range(selected_years[0], selected_years[1] + 1)))
+	df = load_data(selected_location, anos)
+	df_wind = load_data_wind(selected_location, anos)
 
 	if active_tab == "waves":
 		bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
@@ -468,8 +596,8 @@ def update_plots(selected_location, selected_years, selected_month, selected_mon
 		'2,0-2,5': 'rgb(129,0,111)',
 		'> 2,5': 'rgb(44,0,98)'}
 
-		fig1 = plot_monthly_stats(df, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
-		fig4 = plot_annual_stats(df, list(range(selected_years[0], selected_years[1] + 1)), selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig1 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig4 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
 
 
 		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
@@ -488,8 +616,8 @@ def update_plots(selected_location, selected_years, selected_month, selected_mon
 		'NW': 'rgb(109,15,51)'}
 
 
-		fig2 = plot_monthly_stats(df, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
-		fig5 = plot_annual_stats(df,list(range(selected_years[0], selected_years[1] + 1)), selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig2 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig5 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
 
 
 		bins = [0, 8, 10, 12, 14, 16, float('inf')]
@@ -505,8 +633,8 @@ def update_plots(selected_location, selected_years, selected_month, selected_mon
 		'14-16': 'rgb(66,171,93)',
 		'> 16': 'rgb(0,69,41)'}
 
-		fig3 = plot_monthly_stats(df, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
-		fig6 = plot_annual_stats(df, list(range(selected_years[0], selected_years[1] + 1)), selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig3 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig6 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
 
 
 		
@@ -515,13 +643,13 @@ def update_plots(selected_location, selected_years, selected_month, selected_mon
 		{'altura': altura2, 'periodo': periodo2, 'direcao': direcao2},
 		{'altura': altura3, 'periodo': periodo3, 'direcao': direcao3}]
 		
-		fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, list(range(selected_years[0], selected_years[1] + 1)))
+		fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
 		
 
-		return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
+		return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
 
 
-	if active_tab == "wind":
+	elif active_tab == "wind":
 		bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
 		labels = ['< 6', '6-12', '12-15', '15-18', '18-21', '21-25', '25-30', '> 30']
 		parametro = 'int'
@@ -537,8 +665,8 @@ def update_plots(selected_location, selected_years, selected_month, selected_mon
 		'25-30': 'rgb(255,0,255)',
 		'> 30': 'rgb(143,10,40)'}
 
-		fig1_w = plot_monthly_stats(df_wind, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
-		fig4_w = plot_annual_stats(df_wind, list(range(selected_years[0], selected_years[1] + 1)), selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig1_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig4_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
 		
 		
 		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
@@ -557,26 +685,27 @@ def update_plots(selected_location, selected_years, selected_month, selected_mon
 		'NW': 'rgb(109,15,51)'}
 
 
-		fig2_w = plot_monthly_stats(df_wind, list(range(selected_years[0], selected_years[1] + 1)), bins, labels, parametro, nome_parametro,bin_color_map)
-		fig5_w = plot_annual_stats(df_wind,list(range(selected_years[0], selected_years[1] + 1)), selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig2_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig5_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
 		
 
-		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, fig2_w, fig4_w, fig5_w, go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
+		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, fig2_w, fig4_w, fig5_w, go.Figure(), go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
 
 
-	if active_tab == "other":
+	elif active_tab == "other":
 		
-		fig_other = plot_others(df_wind, list(range(selected_years[0], selected_years[1] + 1)))
+		fig_other = plot_others(df_wind, anos)
+		fig_other_times = plot_with_custom_temps(df_wind, anos, selected_hours)
 		
-		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
+		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other, fig_other_times, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
 
-
+	else:
+		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
+	
+	
 
 def update_tab(tab):
 	return tab
-
-
-
 
 
 
