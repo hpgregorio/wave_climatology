@@ -18,8 +18,8 @@ def load_data(location, years):
 	dataframes_list = []
 
 	for year in years:
-		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-		filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+		#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -34,8 +34,8 @@ def load_data_wind(location, years):
 	dataframes_list = []
 
 	for year in years:
-		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-		filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+		#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
