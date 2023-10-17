@@ -2,6 +2,7 @@ import dash
 from dash import Dash, dcc, html, Input, Output, callback
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 
 import pandas as pd
 
@@ -689,161 +690,165 @@ app.layout = dcc.Loading(
 )
 def update_plots(n_clicks, selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours, selected_hours_others):
 
-	#show_loading()
-	anos = list(range(start_year, end_year + 1))
-	# Carregar dados
-	df = load_data(selected_location, anos)
-	df_wind = load_data_wind(selected_location, anos)
-	df_sst = load_data_sst(selected_location, anos)
-	
-	if active_tab == "waves":
-		bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
-		labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
-		parametro = 'VHM0'
-		nome_parametro = 'Significant Wave Height (m)'
-
-		bin_color_map = {
-		'< 1,0': 'rgb(207,159,0)',
-		'1,0-1,5': 'rgb(190,96,0)',
-		'1,5-2,0': 'rgb(165,30,0)',
-		'2,0-2,5': 'rgb(129,0,111)',
-		'> 2,5': 'rgb(44,0,98)'}
-
-		fig1 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
-		fig4 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
-
-
-		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-		labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-		parametro = 'CardinalDirection'
-		nome_parametro = 'Wave direction'
-
-		bin_color_map = {
-		'N': 'rgb(24,0,33)',
-		'NE': 'rgb(60,15,111)',
-		'E': 'rgb(67,78,150)',
-		'SE': 'rgb(102,138,162)',
-		'S': 'rgb(181,180,186)',
-		'SW': 'rgb(171,135,111)',
-		'W': 'rgb(148,64,54)',
-		'NW': 'rgb(109,15,51)'}
-
-
-		fig2 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
-		fig5 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
-
-
-		bins = [0, 8, 10, 12, 14, 16, float('inf')]
-		labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
-		parametro = 'VTPK'
-		nome_parametro = 'Peak wave period (s)'
-
-		bin_color_map = {
-		'< 8': 'rgb(255,255,229)',
-		'8-10': 'rgb(243,250,182)',
-		'10-12': 'rgb(203,234,156)',
-		'12-14': 'rgb(159,215,136)',
-		'14-16': 'rgb(66,171,93)',
-		'> 16': 'rgb(0,69,41)'}
-
-		fig3 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
-		fig6 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
-
-
+	n_cliks = None
+	if n_clicks is None:
+		raise PreventUpdate
+	else:
 		
-		# Condições do usuário
-		conditions = [{'altura': altura1, 'periodo': periodo1, 'direcao': direcao1},
-		{'altura': altura2, 'periodo': periodo2, 'direcao': direcao2},
-		{'altura': altura3, 'periodo': periodo3, 'direcao': direcao3}]
+		anos = list(range(start_year, end_year + 1))
+		# Carregar dados
+		df = load_data(selected_location, anos)
+		df_wind = load_data_wind(selected_location, anos)
+		df_sst = load_data_sst(selected_location, anos)
 		
-		fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
-		
+		if active_tab == "waves":
+			bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
+			labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
+			parametro = 'VHM0'
+			nome_parametro = 'Significant Wave Height (m)'
 
-		return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
+			bin_color_map = {
+			'< 1,0': 'rgb(207,159,0)',
+			'1,0-1,5': 'rgb(190,96,0)',
+			'1,5-2,0': 'rgb(165,30,0)',
+			'2,0-2,5': 'rgb(129,0,111)',
+			'> 2,5': 'rgb(44,0,98)'}
 
-
-	elif active_tab == "wind":
-		bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
-		labels = ['< 6', '6-12', '12-15', '15-18', '18-21', '21-25', '25-30', '> 30']
-		parametro = 'int'
-		nome_parametro = 'Wind speed (knots)'
-
-		bin_color_map = {
-		'< 6': 'rgb(165,218,240)',
-		'6-12': 'rgb(48,108,142)',
-		'12-15': 'rgb(0,255,0)',
-		'15-18': 'rgb(241,230,78)',
-		'18-21': 'rgb(255,100,44)',
-		'21-25': 'rgb(255,10,40)',
-		'25-30': 'rgb(255,0,255)',
-		'> 30': 'rgb(143,10,40)'}
-
-		fig1_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map,selected_hours)
-		fig4_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
-		
-		
-		bins = ['N', 'NE', 'NW', 'E', 'W', 'SW', 'SE', 'S']
-		
-		labels = bins
-		
-		parametro = 'CardinalDirection'
-		nome_parametro = 'Wind direction'
-
-		bin_color_map = {
-		'N': 'rgb(24,0,33)',
-		'NE': 'rgb(60,15,111)',
-		'E': 'rgb(67,78,150)',
-		'SE': 'rgb(102,138,162)',
-		'S': 'rgb(181,180,186)',
-		'SW': 'rgb(171,135,111)',
-		'W': 'rgb(148,64,54)',
-		'NW': 'rgb(109,15,51)'}
-		
-		fig2a_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
-		fig5a_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
-		
-		
-		onshore, offshore, side, side_onshore, side_offshore = wind_type(selected_location);
-
-		# Adiciona a coluna 'WindType'
-		df_wind = add_wind_type_column(df_wind, onshore, side_onshore, offshore, side_offshore, side)
-
-		bins = ['onshore','side-onshore','offshore','side-offshore','side']
-		
-		labels = bins
-		
-		parametro = 'WindType'
-		nome_parametro = 'Wind type direction'
-
-		bin_color_map = {
-		'onshore': 'rgb(109,15,51)',
-		'side-onshore': 'rgb(171,135,111)',
-		'side': 'rgb(181,180,186)',
-		'offshore': 'rgb(67,78,150)',
-		'side-offshore': 'rgb(102,138,162)'}
-		
-		unique_categories_df = df_wind['WindType'].unique()
-
-		# Filtrar bin_color_map para incluir apenas categorias existentes
-		bin_color_map_filtered = {category: bin_color_map[category] for category in unique_categories_df}
-
-		# Usar bin_color_map_filtered em vez do original
-		bin_color_map = bin_color_map_filtered
-		
-		fig2_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
-		fig5_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
-		
-		rose_w = plot_rose()
-
-		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, rose_w, fig2a_w, fig2_w, fig4_w, fig5a_w, fig5_w, go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
+			fig1 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+			fig4 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
 
 
-	elif active_tab == "other":
-		
-		fig_other_times = plot_others(df_wind, df_sst, anos, selected_hours_others)
-		
-		
-		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other_times, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
+			bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+			labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+			parametro = 'CardinalDirection'
+			nome_parametro = 'Wave direction'
+
+			bin_color_map = {
+			'N': 'rgb(24,0,33)',
+			'NE': 'rgb(60,15,111)',
+			'E': 'rgb(67,78,150)',
+			'SE': 'rgb(102,138,162)',
+			'S': 'rgb(181,180,186)',
+			'SW': 'rgb(171,135,111)',
+			'W': 'rgb(148,64,54)',
+			'NW': 'rgb(109,15,51)'}
+
+
+			fig2 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+			fig5 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+
+
+			bins = [0, 8, 10, 12, 14, 16, float('inf')]
+			labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
+			parametro = 'VTPK'
+			nome_parametro = 'Peak wave period (s)'
+
+			bin_color_map = {
+			'< 8': 'rgb(255,255,229)',
+			'8-10': 'rgb(243,250,182)',
+			'10-12': 'rgb(203,234,156)',
+			'12-14': 'rgb(159,215,136)',
+			'14-16': 'rgb(66,171,93)',
+			'> 16': 'rgb(0,69,41)'}
+
+			fig3 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+			fig6 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+
+
+			
+			# Condições do usuário
+			conditions = [{'altura': altura1, 'periodo': periodo1, 'direcao': direcao1},
+			{'altura': altura2, 'periodo': periodo2, 'direcao': direcao2},
+			{'altura': altura3, 'periodo': periodo3, 'direcao': direcao3}]
+			
+			fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
+			
+
+			return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
+
+
+		elif active_tab == "wind":
+			bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
+			labels = ['< 6', '6-12', '12-15', '15-18', '18-21', '21-25', '25-30', '> 30']
+			parametro = 'int'
+			nome_parametro = 'Wind speed (knots)'
+
+			bin_color_map = {
+			'< 6': 'rgb(165,218,240)',
+			'6-12': 'rgb(48,108,142)',
+			'12-15': 'rgb(0,255,0)',
+			'15-18': 'rgb(241,230,78)',
+			'18-21': 'rgb(255,100,44)',
+			'21-25': 'rgb(255,10,40)',
+			'25-30': 'rgb(255,0,255)',
+			'> 30': 'rgb(143,10,40)'}
+
+			fig1_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map,selected_hours)
+			fig4_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+			
+			
+			bins = ['N', 'NE', 'NW', 'E', 'W', 'SW', 'SE', 'S']
+			
+			labels = bins
+			
+			parametro = 'CardinalDirection'
+			nome_parametro = 'Wind direction'
+
+			bin_color_map = {
+			'N': 'rgb(24,0,33)',
+			'NE': 'rgb(60,15,111)',
+			'E': 'rgb(67,78,150)',
+			'SE': 'rgb(102,138,162)',
+			'S': 'rgb(181,180,186)',
+			'SW': 'rgb(171,135,111)',
+			'W': 'rgb(148,64,54)',
+			'NW': 'rgb(109,15,51)'}
+			
+			fig2a_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
+			fig5a_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+			
+			
+			onshore, offshore, side, side_onshore, side_offshore = wind_type(selected_location);
+
+			# Adiciona a coluna 'WindType'
+			df_wind = add_wind_type_column(df_wind, onshore, side_onshore, offshore, side_offshore, side)
+
+			bins = ['onshore','side-onshore','offshore','side-offshore','side']
+			
+			labels = bins
+			
+			parametro = 'WindType'
+			nome_parametro = 'Wind type direction'
+
+			bin_color_map = {
+			'onshore': 'rgb(109,15,51)',
+			'side-onshore': 'rgb(171,135,111)',
+			'side': 'rgb(181,180,186)',
+			'offshore': 'rgb(67,78,150)',
+			'side-offshore': 'rgb(102,138,162)'}
+			
+			unique_categories_df = df_wind['WindType'].unique()
+
+			# Filtrar bin_color_map para incluir apenas categorias existentes
+			bin_color_map_filtered = {category: bin_color_map[category] for category in unique_categories_df}
+
+			# Usar bin_color_map_filtered em vez do original
+			bin_color_map = bin_color_map_filtered
+			
+			fig2_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
+			fig5_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+			
+			rose_w = plot_rose()
+
+			return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, rose_w, fig2a_w, fig2_w, fig4_w, fig5a_w, fig5_w, go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
+
+
+		elif active_tab == "other":
+			
+			fig_other_times = plot_others(df_wind, df_sst, anos, selected_hours_others)
+			
+			
+			return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other_times, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
 
 	
 # Callback para atualizar dinamicamente os rótulos dos horários
@@ -892,11 +897,7 @@ def update_horarios_labels(selected_location):
 	horarios_convertidos_2 = converter_horarios_gmt(np.array([0,3,6,9,12,15,18,21]), horario_gmt)
 	horarios_atualizados_2 = [{'label': f' {hora:02d}h   ', 'value': original} for hora, original in zip(horarios_convertidos, np.array([0,3,6,9,12,15,18,21]))]
 
-
-
 	return horarios_atualizados, horarios_atualizados_2
 	
-	#hide_loading()
-
 if __name__ == '__main__':
 	app.run_server(debug=True)
