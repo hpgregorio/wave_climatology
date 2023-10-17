@@ -51,7 +51,7 @@ def convert_nc_to_csv(location, years):
 
 # Localizações e anos desejados
 locations = [
-    'SANTOSGUARUJA'
+    'ELMERS'
 ]
 
 years = list(range(1993, 2024))

@@ -9,8 +9,13 @@ from plotly import tools
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
+import numpy as np
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP,dbc.themes.SPACELAB,dbc.icons.FONT_AWESOME])
+#app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP,dbc.themes.SPACELAB,dbc.icons.FONT_AWESOME])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
+
 server = app.server
 
 
@@ -18,8 +23,8 @@ def load_data(location, years):
 	dataframes_list = []
 
 	for year in years:
-		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-		#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+		filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -34,8 +39,8 @@ def load_data_wind(location, years):
 	dataframes_list = []
 
 	for year in years:
-		filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-		#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+		filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		
@@ -45,19 +50,52 @@ def load_data_wind(location, years):
 
 	return pd.concat(dataframes_list, ignore_index=True)
 	
-def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map):
-	# Criando uma coluna no dataframe para representar o intervalo de altura
-	if parametro == 'CardinalDirection':
-		df['Range'] = pd.Categorical(df[parametro], categories=bins, ordered=True)
+	
+def load_data_sst(location, years):
+	dataframes_list = []
+
+	for year in years:
+		#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+		filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+		
+		df = pd.read_csv(filename_csv)
+		
+		df['Datetime'] = pd.to_datetime(df['Datetime'])
+
+		dataframes_list.append(df)
+
+	return pd.concat(dataframes_list, ignore_index=True)
+	
+def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours=None):
+	
+	if selected_hours is not None:
+		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
+		
+		# Criando uma coluna no dataframe para representar o intervalo de altura
+		if parametro == 'CardinalDirection' or parametro == 'WindType':
+			df_selected_hours['Range'] = pd.Categorical(df_selected_hours[parametro], categories=bins, ordered=True)
+		else:
+			df_selected_hours['Range'] = pd.cut(df_selected_hours[parametro], bins=bins, labels=labels, right=False)
+
+		# Calculando a distribuição de altura das ondas em cada intervalo por mês
+		height_distribution = df_selected_hours.groupby([df_selected_hours['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
+
 	else:
-		df['Range'] = pd.cut(df[parametro], bins=bins, labels=labels, right=False)
+		# Criando uma coluna no dataframe para representar o intervalo de altura
+		if parametro == 'CardinalDirection' or parametro == 'WindType':
+			df['Range'] = pd.Categorical(df[parametro], categories=bins, ordered=True)
+		else:
+			df['Range'] = pd.cut(df[parametro], bins=bins, labels=labels, right=False)
 
-	# Calculando a distribuição de altura das ondas em cada intervalo por mês
-	height_distribution = df.groupby([df['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
+		# Calculando a distribuição de altura das ondas em cada intervalo por mês
+		height_distribution = df.groupby([df['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
 
+		
+	
 	# Calculando a porcentagem da distribuição
 	height_distribution_percentage = height_distribution.div(height_distribution.sum(axis=1), axis=0) * 100
-
+	
+	
 	# Obtendo os nomes dos meses
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -95,7 +133,7 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 
 	month_data = df[df['Datetime'].dt.month == mes]
 
-	if parametro == 'CardinalDirection':
+	if parametro == 'CardinalDirection' or parametro == 'WindType':
 		month_data['Range'] = pd.Categorical(month_data[parametro], categories=bins, ordered=True)
 	else:
 		month_data['Range'] = pd.cut(month_data[parametro], bins=bins, labels=labels, right=False)
@@ -182,23 +220,25 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 	fig = go.Figure(data=[trace], layout=layout)
 	return fig
 
-
-
-
-
-
-
-
-
-def plot_others(df, selected_years):
-	
-	#df['Datetime'] = pd.to_datetime(df['Datetime'])
+def plot_others(df, df_sst, selected_years, selected_hours=None):
 	
 	df['Month'] = df['Datetime'].dt.month
 	df['Year'] = df['Datetime'].dt.year
 	
-	monthly_temp_avg = df.groupby('Month')['temp'].mean()
-	monthly_sst_avg = df.groupby('Month')['sst'].mean()
+	df_sst['Month'] = df_sst['Datetime'].dt.month
+	df_sst['Year'] = df_sst['Datetime'].dt.year
+
+
+	if selected_hours is not None:
+		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
+		df_selected_hours['Month'] = df_selected_hours['Datetime'].dt.month
+		df_selected_hours['Year'] = df_selected_hours['Datetime'].dt.year
+		
+		monthly_temp_avg = df_selected_hours.groupby('Month')['temp'].mean()
+	else:
+		monthly_temp_avg = df.groupby('Month')['temp'].mean()
+
+	monthly_sst_avg = df_sst.groupby('Month')['sst'].mean()
 	
 	# Agrupe os dados por ano e mês, somando a coluna 'prec'
 	monthly_prec_sum = df.groupby(['Year', 'Month'])['prec'].sum().reset_index()
@@ -248,11 +288,12 @@ def plot_others(df, selected_years):
 	
 	layout = go.Layout(
 		title=f'Air Temp, Sea Temp and Prec<br>- {title_years}',
-		yaxis=dict(title='Precipitation (mm/month)'),
+		yaxis=dict(title='Precipitation (mm/month)', range=[0, 200]),
 		yaxis2=dict(
 			title='Temperature (°C)',
 			overlaying='y',
-			side='right'
+			side='right',
+			range=[12, 32]
 		),
 		plot_bgcolor='white',
 		yaxis_gridcolor='lightgray',
@@ -276,102 +317,155 @@ def plot_others(df, selected_years):
 	fig = go.Figure(data=[trace_temp,trace_sst,trace_prec], layout=layout)
 	return fig
 
+def plot_rose():
 
-
-
-def plot_with_custom_temps(df, selected_years, selected_hours):
-    # ...
-
-	df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
-	#df_selected_hours['temp'] = df['temp'][df['Datetime'].dt.hour.isin(selected_hours)]
-	df_selected_hours['Month'] = df_selected_hours['Datetime'].dt.month
-	df_selected_hours['Year'] = df_selected_hours['Datetime'].dt.year
-	
-	df['Month'] = df['Datetime'].dt.month
-	df['Year'] = df['Datetime'].dt.year
-	
-	monthly_temp_avg = df_selected_hours.groupby('Month')['temp'].mean()
-	monthly_sst_avg = df.groupby('Month')['sst'].mean()
-	
-	# Agrupe os dados por ano e mês, somando a coluna 'prec'
-	monthly_prec_sum = df.groupby(['Year', 'Month'])['prec'].sum().reset_index()
-	
-	# Calcule a média mensal ao longo dos anos
-	monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
-	monthly_prec_avg = monthly_prec_avg*1000 #transformar para mm/mês
-	
-	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-	title_years = f"{selected_years[0]} to {selected_years[-1]}"
-	
 	fig = go.Figure()
 	
-	# Adicione barras para precipitação primeiro
-	trace_prec = go.Bar(
-		x=month_names,
-		y=monthly_prec_avg['prec'],
-		name='Precipitation',
-		marker=dict(color='rgb(200, 200, 200)')
+	trace = [];
+	trace = go.Barpolar(
+		r=[4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5],
+		theta=[0, 45, 90, 135, 180, 225, 270, 315],
+		width=[40,40,40,40,40,40,40,40],
+		marker_color=['rgb(24,0,33)','rgb(60,15,111)','rgb(67,78,150)','rgb(102,138,162)','rgb(181,180,186)','rgb(171,135,111)','rgb(148,64,54)','rgb(109,15,51)'],
+		marker_line_color="black",
+		marker_line_width=0.1
 	)
 
-	# Adicione os traços de linha
-	trace_temp = go.Scatter(
-		x=month_names,
-		y=monthly_temp_avg,
-		mode='lines+markers',
-		name='Air Temp',
-		line=dict(color='rgb(67, 78, 150)'),
-		yaxis='y2'
-	)
-
-	trace_sst = go.Scatter(
-		x=month_names,
-		y=monthly_sst_avg,
-		mode='lines+markers',
-		name='Sea Temp',
-		line=dict(color='rgb(220, 20, 60)'),
-		yaxis='y2'
-	)
-
-	# Adicione os traços ao gráfico
-	fig.add_trace(trace_prec)
-	fig.add_trace(trace_temp)
-	fig.add_trace(trace_sst)
+	fig.add_trace(trace)
 	
-	
-	
-	layout = go.Layout(
-		title=f'Air Temp, Sea Temp and Prec<br>- {title_years}',
-		yaxis=dict(title='Precipitation (mm/month)'),
-		yaxis2=dict(
-			title='Temperature (°C)',
-			overlaying='y',
-			side='right'
+	fig.update_layout(
+		showlegend = False,
+		polar = dict(
+			radialaxis = dict(
+				tickvals=[0, 5],
+				ticktext=["", ""],
+				tickfont_size = 8,
+				gridcolor = 'white',
+				linecolor = 'rgb(67,78,150)'
+				
+			),
+			angularaxis = dict(
+				tickfont_size = 12,
+				rotation = 90,
+				direction = "clockwise",
+				tickvals=[0, 45, 90, 135, 180, 225, 270, 315],
+				ticktext=["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
+				gridcolor = 'white',
+				linecolor = 'black'
+				
+			),
+			bgcolor='white'
 		),
-		plot_bgcolor='white',
-		yaxis_gridcolor='lightgray',
-		yaxis_gridwidth=0.0001,
-		height=350,
-		width=400,
-		legend=dict(
-			x=0.1,
-			y=-0.15,
-			orientation='h',
-			bgcolor='rgba(255, 255, 255, 0.5)',
-			traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
-			bordercolor='rgba(255, 255, 255, 0)',  # Cor da borda da legenda (transparente)
-			borderwidth=0,  # Largura da borda da legenda
-			xanchor='left',  # Ancoragem horizontal no centro
-			yanchor='top'  # Ancoragem vertical no topo
-		)
-	)
+		height=100,
+		width=100,
+		margin=dict(l=20, r=20, t=20, b=20)
 
+    )	
 
-	fig = go.Figure(data=[trace_temp,trace_sst,trace_prec], layout=layout)
 	return fig
+	
+def add_wind_type_column(df, onshore, side_onshore, offshore, side_offshore, side):
+	conditions = [
+		df['CardinalDirection'].isin(onshore),
+		df['CardinalDirection'].isin(side_onshore),
+		df['CardinalDirection'].isin(offshore),
+		df['CardinalDirection'].isin(side_offshore),
+		df['CardinalDirection'].isin(side)
+	]
+
+	choices = ['onshore', 'side-onshore', 'offshore', 'side-offshore', 'side']
+
+	df['WindType'] = np.select(conditions, choices, default=None)
+
+	return df		
 
 
+def wind_type(selected_location):
+	if selected_location == 'JERICOACOARA':
+		onshore = ['N']
+		offshore = ['S']
+		side = ['W','E']
+		side_onshore = ['NE','NW']
+		side_offshore = ['SE','SW']
 
 
+	if selected_location == 'SAOSEBASTIAO': 
+		onshore = ['SW','S']
+		offshore = ['NE','N']
+		side = ['W','E']
+		side_onshore = ['SE']
+		side_offshore = ['NW']
+
+
+	if selected_location == 'CRICANORTE':
+		onshore = ['W','SW']
+		offshore = ['E','NE']
+		side = ['NW','SE']
+		side_onshore = ['S']
+		side_offshore = ['N']
+
+
+	if selected_location == 'CRICASUL':
+		onshore = ['E']
+		offshore = ['W']
+		side = ['N','S']
+		side_onshore = ['NE','SE']
+		side_offshore = ['NW','SW']
+
+
+	if selected_location == 'ELSALVADOR':
+		onshore = ['S']
+		offshore = ['N']
+		side = ['W','E']
+		side_onshore = ['SW','SE']
+		side_offshore = ['NW','NE']
+
+
+	if selected_location == 'MARROCOSKAOKI':
+		onshore = ['W']
+		offshore = ['E']
+		side = ['N','S']
+		side_onshore = ['NW','SW']
+		side_offshore = ['NE','SE']
+
+
+	if selected_location == 'MARROCOSTAGHAZOUT':
+		onshore = ['W']
+		offshore = ['E']
+		side = ['N','S']
+		side_onshore = ['NW','SW']
+		side_offshore = ['NE','SE']
+
+
+	if selected_location == 'MARROCOSMIRLEFT':
+		onshore = ['NW']
+		offshore = ['SE']
+		side = ['NE','SW']
+		side_onshore = ['N','W']
+		side_offshore = ['S','E']
+
+
+	if selected_location == 'PACASMAYO':
+		onshore = ['NW','W']
+		offshore = ['SE','E']
+		side = ['SW','NE']
+		side_onshore = ['N']
+		side_offshore = ['S']
+
+	if selected_location == 'ELMERS':
+		onshore = ['SE']
+		offshore = ['NW']
+		side = ['NE','SW']
+		side_onshore = ['E','S']
+		side_offshore = ['N','W']
+
+	return onshore, offshore, side, side_onshore, side_offshore
+	
+	
+# Função para converter os horários de acordo com o GMT específico
+def converter_horarios_gmt(horarios, gmt):
+	horarios_convertidos = [(hora + gmt) % 24 for hora in horarios]
+	return horarios_convertidos
 
 app.layout = dcc.Loading(
     id="loading-container",
@@ -382,21 +476,21 @@ app.layout = dcc.Loading(
     children=[
 
 		dbc.Container([
-
+		
 			html.Label("Location:"),
 			dcc.Dropdown(
 				id='location-dropdown',
 				options=[
 					{'label': 'BRAZIL (JERICOACOARA - 2.77S 40.52W)', 'value': 'JERICOACOARA'},
 					{'label': 'BRAZIL (SÃO SEBASTIÃO - 24.4S 45.5W)', 'value': 'SAOSEBASTIAO'},
-					#{'label': 'BRAZIL (SANTOS/GUARUJÁ - 24.15S 46.2W)', 'value': 'SANTOSGUARUJA'},			
 					{'label': 'COSTA RICA (GUANACASTE - 10.1N 85.9W)', 'value': 'CRICANORTE'},
 					{'label': 'COSTA RICA (PENINSULA OSA - 8.1N 83.2W)', 'value': 'CRICASUL'},
 					{'label': 'EL SALVADOR (EL TUNCO - 13N 89.4W)', 'value': 'ELSALVADOR'},
 					{'label': 'MARROCOS (SIDI KAOKI - 30.55N 9.9W)', 'value': 'MARROCOSKAOKI'},
 					{'label': 'MARROCOS (TAGHAZOUT - 30.4N 9.8W)', 'value': 'MARROCOSTAGHAZOUT'},
 					{'label': 'MARROCOS (MIRLEFT - 29.5N 10.2W)', 'value': 'MARROCOSMIRLEFT'},
-					{'label': 'PERU (PACASMAYO - 7.4S 79.8W)', 'value': 'PACASMAYO'}
+					{'label': 'PERU (PACASMAYO - 7.4S 79.8W)', 'value': 'PACASMAYO'},
+					{'label': 'USA (ELMERS ISLAND/LA - 29.17N 90.5W)', 'value': 'ELMERS'}
 					# Adicione mais opções de local conforme necessário
 				],
 				value='SAOSEBASTIAO'
@@ -417,8 +511,20 @@ app.layout = dcc.Loading(
 					options=[{'label': str(i), 'value': i} for i in range(1993, 2024)],
 					value=2023,
 				),
-			], style={'display': 'flex', 'alignItems': 'center'}),
 			
+				html.Div(children=' ', style={'margin': '0 10px'}),
+				
+			    # Botão flutuante para atualizar
+				dbc.Button(
+					"Update graphs",
+					id="update-button",
+					n_clicks=0,
+					color="primary",
+	#				className="float-button",
+				),
+			
+			], style={'display': 'flex', 'alignItems': 'center'}),
+	
 			html.Br(),
 			
 			dbc.Tabs([
@@ -477,8 +583,28 @@ app.layout = dcc.Loading(
 			
 			
 			html.Div([
+			
+				html.Br(),
+				html.Label("Select the hours of the day to analyze"),
+				html.Br(),
+				html.Label("the wind (local time):"),
+
+				# Caixas de seleção para os horários
+				dcc.Checklist(
+					id='horarios-checklist_wind',
+					options=[
+						{'label': f' {hora:02d}h   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
+					],
+					value=[0, 3, 6, 9, 12, 15, 18, 21],
+					style={'white-space': 'pre'}
+				),	
+				
 				dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}),
+				dcc.Graph(id='rose_wind', style={'width': '100%'}),
+				
 				dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}),
+				dcc.Graph(id='monthly-stats-plot-dir_wind_t', style={'width': '100%'}),
+				
 			
 				html.Div([
 					html.Label("Select the month:"),
@@ -494,32 +620,24 @@ app.layout = dcc.Loading(
 				
 				dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}),
 				dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}),
+				dcc.Graph(id='annual-stats-plot-dir_wind_t', style={'width': '100%'}),
 			], id="wind-content", style={'display': 'none'}),	
 			
 			html.Div([
-				dcc.Graph(id='other_anual', style={'width': '100%'}),
 				html.Br(),
+				html.Label("Select the hours of the day to analyze"),
 				html.Br(),
-				html.Label("Select the time of the day to analyse"),
-				html.Br(),
-				html.Label("the air temperature (times in GMT!):"),
+				html.Label("the air temperature (local time):"),
 
 				# Caixas de seleção para os horários
 				dcc.Checklist(
-					id='horarios-checklist',
+					id='horarios-checklist_sst',
 					options=[
-						{'label': ' 00h   ', 'value': 0},
-						{'label': ' 03h   ', 'value': 3},
-						{'label': ' 06h   ', 'value': 6},
-						{'label': ' 09h   ', 'value': 9},
-						{'label': ' 12h   ', 'value': 12},
-						{'label': ' 15h   ', 'value': 15},
-						{'label': ' 18h   ', 'value': 18}
+						{'label': f' {hora:02d}h   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 					],
-					value=[],  # Valor inicial, lista vazia
-					style={'white-space': 'pre'}  # Adiciona a propriedade CSS para preservar espaços
+					value=[0, 3, 6, 9, 12, 15, 18, 21],
+					style={'white-space': 'pre'}
 				),
-			
 
 				dcc.Graph(id='other_anual_times', style={'width': '100%'}),
 						
@@ -528,9 +646,6 @@ app.layout = dcc.Loading(
 		]),
 	]
 )
-
-last_user_state = None
-
 
 # Callbacks para atualizar os gráficos e a guia ativa
 @app.callback(
@@ -542,16 +657,19 @@ last_user_state = None
 	 Output('annual-stats-plot-dir', 'figure'),
 	 Output('annual-stats-plot-per', 'figure'),
 	 Output('monthly-stats-plot-int_wind', 'figure'),
+	 Output('rose_wind', 'figure'),
 	 Output('monthly-stats-plot-dir_wind', 'figure'),
+	 Output('monthly-stats-plot-dir_wind_t', 'figure'),
 	 Output('annual-stats-plot-int_wind', 'figure'),
 	 Output('annual-stats-plot-dir_wind', 'figure'),
-	 Output('other_anual', 'figure'),
+	 Output('annual-stats-plot-dir_wind_t', 'figure'),
 	 Output('other_anual_times', 'figure'),
 	 Output('tabs', 'active_tab'),
 	 Output('waves-content', 'style'),
 	 Output('wind-content', 'style'),
 	 Output('others-content', 'style')],
-	[Input('location-dropdown', 'value'),
+	[Input('update-button', 'n_clicks'),
+	 Input('location-dropdown', 'value'),
 	 Input('start-year', 'value'),
 	 Input('end-year', 'value'),
 	 Input('month-dropdown', 'value'),
@@ -566,15 +684,17 @@ last_user_state = None
 	 Input('periodo3', 'value'),
 	 Input('direcao3', 'value'),
 	 Input("tabs", "active_tab"),
-	 Input('horarios-checklist', 'value')]
+	 Input('horarios-checklist_wind', 'value'),
+	 Input('horarios-checklist_sst', 'value')]
 )
-def update_plots(selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours):
+def update_plots(n_clicks, selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours, selected_hours_others):
 
 	#show_loading()
 	anos = list(range(start_year, end_year + 1))
 	# Carregar dados
 	df = load_data(selected_location, anos)
 	df_wind = load_data_wind(selected_location, anos)
+	df_sst = load_data_sst(selected_location, anos)
 	
 	if active_tab == "waves":
 		bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
@@ -639,7 +759,7 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 		fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
 		
 
-		return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
+		return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
 
 
 	elif active_tab == "wind":
@@ -658,12 +778,14 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 		'25-30': 'rgb(255,0,255)',
 		'> 30': 'rgb(143,10,40)'}
 
-		fig1_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		fig1_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map,selected_hours)
 		fig4_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
 		
 		
-		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-		labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+		bins = ['N', 'NE', 'NW', 'E', 'W', 'SW', 'SE', 'S']
+		
+		labels = bins
+		
 		parametro = 'CardinalDirection'
 		nome_parametro = 'Wind direction'
 
@@ -676,26 +798,103 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 		'SW': 'rgb(171,135,111)',
 		'W': 'rgb(148,64,54)',
 		'NW': 'rgb(109,15,51)'}
+		
+		fig2a_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
+		fig5a_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
+		
+		
+		onshore, offshore, side, side_onshore, side_offshore = wind_type(selected_location);
 
+		# Adiciona a coluna 'WindType'
+		df_wind = add_wind_type_column(df_wind, onshore, side_onshore, offshore, side_offshore, side)
 
-		fig2_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map)
+		bins = ['onshore','side-onshore','offshore','side-offshore','side']
+		
+		labels = bins
+		
+		parametro = 'WindType'
+		nome_parametro = 'Wind type direction'
+
+		bin_color_map = {
+		'onshore': 'rgb(109,15,51)',
+		'side-onshore': 'rgb(171,135,111)',
+		'side': 'rgb(181,180,186)',
+		'offshore': 'rgb(67,78,150)',
+		'side-offshore': 'rgb(102,138,162)'}
+		
+		unique_categories_df = df_wind['WindType'].unique()
+
+		# Filtrar bin_color_map para incluir apenas categorias existentes
+		bin_color_map_filtered = {category: bin_color_map[category] for category in unique_categories_df}
+
+		# Usar bin_color_map_filtered em vez do original
+		bin_color_map = bin_color_map_filtered
+		
+		fig2_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
 		fig5_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map)
 		
+		rose_w = plot_rose()
 
-		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, fig2_w, fig4_w, fig5_w, go.Figure(), go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
+		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, rose_w, fig2a_w, fig2_w, fig4_w, fig5a_w, fig5_w, go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
 
 
 	elif active_tab == "other":
 		
-		fig_other = plot_others(df_wind, anos)
-		fig_other_times = plot_with_custom_temps(df_wind, anos, selected_hours)
+		fig_other_times = plot_others(df_wind, df_sst, anos, selected_hours_others)
 		
-		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other, fig_other_times, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
+		
+		return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other_times, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
 
-	else:
-		return [ go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
 	
+# Callback para atualizar dinamicamente os rótulos dos horários
+@app.callback(
+	[Output('horarios-checklist_wind', 'options'),
+	Output('horarios-checklist_sst', 'options')],
+	[Input('location-dropdown', 'value')]
+	)
+def update_horarios_labels(selected_location):
+    
+	if selected_location == 'JERICOACOARA':
+		horario_gmt = -3
 
+	if selected_location == 'SAOSEBASTIAO': 
+		horario_gmt = -3
+
+	if selected_location == 'CRICANORTE':
+		horario_gmt = -6
+
+	if selected_location == 'CRICASUL':
+		horario_gmt = -6
+
+	if selected_location == 'ELSALVADOR':
+		horario_gmt = -6
+
+	if selected_location == 'MARROCOSKAOKI':
+		horario_gmt = +1
+
+	if selected_location == 'MARROCOSTAGHAZOUT':
+		horario_gmt = +1
+
+	if selected_location == 'MARROCOSMIRLEFT':
+		horario_gmt = +1
+
+	if selected_location == 'PACASMAYO':
+		horario_gmt = -5
+
+	if selected_location == 'ELMERS':
+		horario_gmt = -5
+
+	
+	horarios_convertidos = converter_horarios_gmt(np.array([0,3,6,9,12,15,18,21]), horario_gmt)
+	horarios_atualizados = [{'label': f' {hora:02d}h   ', 'value': original} for hora, original in zip(horarios_convertidos, np.array([0,3,6,9,12,15,18,21]))]
+
+
+	horarios_convertidos_2 = converter_horarios_gmt(np.array([0,3,6,9,12,15,18,21]), horario_gmt)
+	horarios_atualizados_2 = [{'label': f' {hora:02d}h   ', 'value': original} for hora, original in zip(horarios_convertidos, np.array([0,3,6,9,12,15,18,21]))]
+
+
+
+	return horarios_atualizados, horarios_atualizados_2
 	
 	#hide_loading()
 
