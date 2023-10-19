@@ -107,7 +107,7 @@ app.layout = dbc.Accordion([
 						type='dot',
 						fullscreen=True,
 						color='rgba(64,183,173,1)',
-						style={'backgroundColor': 'rgba(255,255,255,1)'},
+						style={'backgroundColor': None},
 						children=[
 
 							dbc.Container([
@@ -149,13 +149,13 @@ app.layout = dbc.Accordion([
 									html.Div(children=' ', style={'margin': '0 10px'}),
 									
 									# Botão flutuante para atualizar
-									dbc.Button(
-										"Update graphs",
-										id="update-button",
-										n_clicks=0,
-										color="secondary",
+									#dbc.Button(
+									#	"Update graphs",
+									#	id="update-button",
+									#	n_clicks=0,
+									#	color="secondary",
 						#				className="float-button",
-									),
+									#),
 								
 								], style={'display': 'flex', 'alignItems': 'center'}),
 						
@@ -221,13 +221,14 @@ app.layout = dbc.Accordion([
 									html.Br(),
 									html.Label("(local time - more than one = average):"),
 
-									dcc.Checklist(
+									dcc.Dropdown(
 										id='horarios-checklist_wind',
 										options=[
 											{'label': f' {hora:02d}h   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 										],
 										value=[],
-										style={'white-space': 'pre', 'display': 'block'}
+										multi=True,
+										style={'white-space': 'pre'}
 									),	
 									
 									dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}),
@@ -259,17 +260,19 @@ app.layout = dbc.Accordion([
 									html.Br(),
 									html.Label("temperature (local time - more than one = average):"),
 
-									# Caixas de seleção para os horários
-									dcc.Checklist(
+									dcc.Dropdown(
 										id='horarios-checklist_sst',
 										options=[
 											{'label': f' {hora:02d}h   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 										],
 										value=[],
+										multi=True,
 										style={'white-space': 'pre'}
 									),
-
+									
+									html.Br(),
 									dcc.Graph(id='other_anual_times', style={'width': '100%'}),
+									html.Br(),
 									
 									html.Div([
 										html.Label("Select the month:"),
@@ -338,8 +341,8 @@ app.layout = dbc.Accordion([
 	 Output('waves-content', 'style'),
 	 Output('wind-content', 'style'),
 	 Output('others-content', 'style')],
-	[Input('update-button', 'n_clicks'),
-	 Input('location-dropdown', 'value'),
+	#[Input('update-button', 'n_clicks'),
+	[Input('location-dropdown', 'value'),
 	 Input('start-year', 'value'),
 	 Input('end-year', 'value'),
 	 Input('month-dropdown', 'value'),
@@ -358,12 +361,13 @@ app.layout = dbc.Accordion([
 	 Input('horarios-checklist_sst', 'value'),
 	 Input('month-dropdown_others', 'value')]
 )
-def update_plots(n_clicks, selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours, selected_hours_others, selected_month_others):
+#def update_plots(n_clicks, selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours, selected_hours_others, selected_month_others):
+def update_plots(selected_location, start_year, end_year, selected_month, selected_month_wind, altura1, periodo1, direcao1, altura2, periodo2, direcao2, altura3, periodo3, direcao3, active_tab, selected_hours, selected_hours_others, selected_month_others):
 
-	n_cliks = None
-	if n_clicks is None:
-		raise PreventUpdate
-	else:
+	#n_cliks = None
+	#if n_clicks is None:
+	#	raise PreventUpdate
+	#else:
 		anos = list(range(start_year, end_year + 1))
 
 		df = load_data(selected_location, anos, 'ONDAS')
@@ -503,7 +507,7 @@ def update_plots(n_clicks, selected_location, start_year, end_year, selected_mon
 
 		elif active_tab == "other":
 			
-			fig_other = plot_others(df_wind, df_sst, anos, selected_hours_others)
+			fig_other = plot_others(df_wind, df_sst, anos, selected_location, selected_hours_others)
 			
 			fig_other_prec = plot_annual_stats_others(df_wind, anos, selected_month_others, 'prec', 'Precipitation')
 			

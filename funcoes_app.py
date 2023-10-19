@@ -1,6 +1,7 @@
 import pandas as pd
 from numpy import select
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 
 def load_data(location, years, type):
 	dataframes_list = []
@@ -171,8 +172,61 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 	fig = go.Figure(data=[trace], layout=layout)
 	return fig
 
-def plot_others(df, df_sst, selected_years, selected_hours=None):
+def plot_others(df, df_sst, selected_years, selected_location, selected_hours=None):
+
+	tit = {'JERICOACOARA' : 'Jericoacoara/CE (Brazil)',
+		'SAOSEBASTIAO' : 'São Sebastião/SP (Brazil)',
+		'CRICANORTE' : 'Guanacaste (Costa Rica)',
+		'CRICASUL' : 'Peninsula Osa (Costa Rica)',
+		'ELSALVADOR' : 'El Tunco (El Salvador)',
+		'MARROCOSKAOKI' : 'Sidi Kaoki (Morrocco)',
+		'MARROCOSTAGHAZOUT' : 'Taghazout (Morrocco)',
+		'MARROCOSMIRLEFT' : 'Mirleft (Morrocco)',
+		'PACASMAYO' : 'Pacasmayo (Peru)',
+		'ELMERS' : 'Elmers Island/LA (USA)'}
 	
+	if selected_years != list(range(1993, 2023 + 1)):
+		#####
+		#historic data
+		#####
+		df_sst_hist = load_data(selected_location, list(range(1993, 2023 + 1)), 'SST')
+		df_sst_hist['Month'] = df_sst_hist['Datetime'].dt.month
+		df_sst_hist['Year'] = df_sst_hist['Datetime'].dt.year
+		
+		df_temp_hist = load_data(selected_location, list(range(1993, 2023 + 1)), 'VENTOS')
+		df_temp_hist['Month'] = df_temp_hist['Datetime'].dt.month
+		df_temp_hist['Year'] = df_temp_hist['Datetime'].dt.year
+		
+		if selected_hours is not None:
+			df_selected_hours = df_temp_hist[df_temp_hist['Datetime'].dt.hour.isin(selected_hours)]
+			df_selected_hours['Month'] = df_selected_hours['Datetime'].dt.month
+			df_selected_hours['Year'] = df_selected_hours['Datetime'].dt.year
+			
+			monthly_temp_avg_hist = df_selected_hours.groupby('Month')['temp'].mean()
+			monthly_temp_std_hist = df_selected_hours.groupby('Month')['temp'].std()
+			
+			hours_tit = 'h , '.join(['%1.0f' % val for val in selected_hours])
+		else:
+			monthly_temp_avg_hist = df_temp_hist.groupby('Month')['temp'].mean()
+			monthly_temp_std_hist = df_temp_hist.groupby('Month')['temp'].std()
+
+		monthly_sst_avg_hist = df_sst_hist.groupby('Month')['sst'].mean()
+		monthly_sst_std_hist = df_sst_hist.groupby('Month')['sst'].std()
+
+		
+		#PRECIPITAÇÃO - precisa somar todos os dados do mês - dados dão a precipitação a cada 3h - grafico é precipitação/mês
+		
+		# Agrupe os dados por ano e mês, somando a coluna 'prec' - o resultado é a precipitação total mensal ao longo dos anos
+		monthly_prec_sum = df_temp_hist.groupby(['Year', 'Month'])['prec'].sum().reset_index()
+		
+		# Calcule a média mensal ao longo dos anos
+		monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
+		monthly_prec_avg_hist = monthly_prec_avg*1000 #transformar para mm/mês (dado original está em m)
+		
+		#####
+		#####
+		#####
+		
 	df['Month'] = df['Datetime'].dt.month
 	df['Year'] = df['Datetime'].dt.year
 	
@@ -185,83 +239,217 @@ def plot_others(df, df_sst, selected_years, selected_hours=None):
 		df_selected_hours['Year'] = df_selected_hours['Datetime'].dt.year
 		
 		monthly_temp_avg = df_selected_hours.groupby('Month')['temp'].mean()
+		
+		hours_tit = 'h , '.join(['%1.0f' % val for val in selected_hours])
 	else:
 		monthly_temp_avg = df.groupby('Month')['temp'].mean()
 
 	monthly_sst_avg = df_sst.groupby('Month')['sst'].mean()
 	
-	# Agrupe os dados por ano e mês, somando a coluna 'prec'
+	#PRECIPITAÇÃO - precisa somar todos os dados do mês - dados dão a precipitação a cada 3h - grafico é precipitação/mês
+	
+	# Agrupe os dados por ano e mês, somando a coluna 'prec' - o resultado é a precipitação total mensal ao longo dos anos
 	monthly_prec_sum = df.groupby(['Year', 'Month'])['prec'].sum().reset_index()
 	
 	# Calcule a média mensal ao longo dos anos
 	monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
-	monthly_prec_avg = monthly_prec_avg*1000 #transformar para mm/mês
+	monthly_prec_avg = monthly_prec_avg*1000 #transformar para mm/mês (dado original está em m)
+	
+	
+	
+	
 	
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-	title_years = f"{selected_years[0]} to {selected_years[-1]}"
+	if selected_years[0] == selected_years[-1]:
+		title_years = f"{selected_years[0]}"
+	else:
+		title_years = f"{selected_years[0]} to {selected_years[-1]}"
 	
-	fig = go.Figure()
 	
-	# Adicione barras para precipitação primeiro
-	trace_prec = go.Bar(
-		x=month_names,
-		y=monthly_prec_avg['prec'],
-		name='Precipitation',
-		marker=dict(color='rgb(200, 200, 200)')
-	)
+	if selected_years != list(range(1993, 2023 + 1)):
 
-	# Adicione os traços de linha
-	trace_temp = go.Scatter(
-		x=month_names,
-		y=monthly_temp_avg,
-		mode='lines+markers',
-		name='Air Temp',
-		line=dict(color='rgb(67, 78, 150)'),
-		yaxis='y2'
-	)
-
-	trace_sst = go.Scatter(
-		x=month_names,
-		y=monthly_sst_avg,
-		mode='lines+markers',
-		name='Sea Temp',
-		line=dict(color='rgb(220, 20, 60)'),
-		yaxis='y2'
-	)
-
-	# Adicione os traços ao gráfico
-	fig.add_trace(trace_prec)
-	fig.add_trace(trace_temp)
-	fig.add_trace(trace_sst)
-	
-	layout = go.Layout(
-		title=f'Air Temp, Sea Temp and Prec<br>- {title_years}',
-		yaxis=dict(title='Precipitation (mm/month)', range=[0, 200]),
-		yaxis2=dict(
-			title='Temperature (°C)',
-			overlaying='y',
-			side='right',
-			range=[12, 32]
-		),
-		plot_bgcolor='white',
-		yaxis_gridcolor='lightgray',
-		yaxis_gridwidth=0.0001,
-		height=350,
-		width=400,
-		legend=dict(
-			x=0.1,
-			y=-0.15,
-			orientation='h',
-			bgcolor='rgba(255, 255, 255, 0.5)',
-			traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
-			bordercolor='rgba(255, 255, 255, 0)',  # Cor da borda da legenda (transparente)
-			borderwidth=0,  # Largura da borda da legenda
-			xanchor='left',  # Ancoragem horizontal no centro
-			yanchor='top'  # Ancoragem vertical no topo
+		fig = make_subplots(rows=3, cols=1, shared_xaxes=False, subplot_titles=[f'{tit.get(selected_location, 0)}', ''], vertical_spacing=0.05)
+		
+		# Adicione barras para precipitação primeiro
+		trace_prec = go.Bar(
+			x=month_names,
+			y=monthly_prec_avg['prec'],
+			name='Precipitation (%s)'%title_years,
+			marker=dict(color='rgba(64,183,173,1)')
 		)
-	)
+		
+		# Adicione barras para precipitação primeiro
+		trace_prec_hist = go.Bar(
+			x=month_names,
+			y=monthly_prec_avg_hist['prec'],
+			name='Historic Precipitation (1993 to 2023)',
+			marker=dict(color='rgba(0, 0, 0, 0.2)')
+		)
 
-	fig = go.Figure(data=[trace_temp,trace_sst,trace_prec], layout=layout)
+		# Adicione os traços de linha
+		trace_temp_hist = go.Scatter(
+			x=month_names,
+			y=monthly_temp_avg_hist,
+			mode='lines',
+			name='Historic Air Temp (%sh - 1993 to 2023)'%(hours_tit),
+			line=dict(color='rgb(67, 78, 150)', dash='dot'),
+			
+		)
+		
+		upper_bound = [avg + std for avg, std in zip(monthly_temp_avg_hist, monthly_temp_std_hist)]
+		lower_bound = [avg - std for avg, std in zip(monthly_temp_avg_hist, monthly_temp_std_hist)]
+
+		
+		trace_temp_area = go.Scatter(
+			x=month_names + month_names[::-1],  # Concatenate month_names with its reverse
+			y=upper_bound + lower_bound[::-1],
+			fill='toself',  # Indicates to fill the area
+			fillcolor='rgba(67, 78, 150, 0.2)',  # Color and transparency of the filled area
+			line=dict(color='rgba(255, 255, 255, 0)'),  # Hide the line of the area trace
+			showlegend=False,  # Do not show legend for the area trace
+			
+		)
+		
+		trace_temp = go.Scatter(
+			x=month_names,
+			y=monthly_temp_avg,
+			mode='lines+markers',
+			name='Air Temp (%sh - %s)'%(hours_tit,title_years),
+			line=dict(color='rgb(67, 78, 150)'),
+			
+		)
+
+		trace_sst_hist = go.Scatter(
+			x=month_names,
+			y=monthly_sst_avg_hist,
+			mode='lines',
+			name='Historic Sea Temp (1993 to 2023)',
+			line=dict(color='rgb(220, 20, 60)', dash='dot'),
+			
+		)
+		
+		upper_bound = [avg + std for avg, std in zip(monthly_sst_avg_hist, monthly_sst_std_hist)]
+		lower_bound = [avg - std for avg, std in zip(monthly_sst_avg_hist, monthly_sst_std_hist)]
+
+		
+		trace_sst_area = go.Scatter(
+			x=month_names + month_names[::-1],  # Concatenate month_names with its reverse
+			y=upper_bound + lower_bound[::-1],
+			fill='toself',  # Indicates to fill the area
+			fillcolor='rgba(220, 20, 60, 0.2)',  # Color and transparency of the filled area
+			line=dict(color='rgba(255, 255, 255, 0)'),  # Hide the line of the area trace
+			showlegend=False,  # Do not show legend for the area trace
+			
+		)
+
+		trace_sst = go.Scatter(
+			x=month_names,
+			y=monthly_sst_avg,
+			mode='lines+markers',
+			name='Sea Temp (%s)'%title_years,
+			line=dict(color='rgb(220, 20, 60)'),
+			
+		)
+
+		fig.update_layout(
+			
+			yaxis=dict(title='Precipitation (mm/month)'),# range=[0, 200]),
+			yaxis2=dict(title='Air Temp (°C)'),
+			yaxis3=dict(title='Sea Temp (°C)'),
+			plot_bgcolor='white',
+			yaxis_gridcolor='lightgray',
+			yaxis_gridwidth=0.0001,
+			yaxis2_gridcolor='lightgray',
+			yaxis2_gridwidth=0.0001,
+			yaxis3_gridcolor='lightgray',
+			yaxis3_gridwidth=0.0001,
+			height=300*3,
+			width=400,
+			margin=dict(l=10, r=10, t=40, b=10),
+			legend=dict(
+				x=-0.15,
+				y=-0.05,
+				orientation='h',
+				bgcolor='rgba(255, 255, 255, 0)',
+				traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
+				bordercolor='rgba(255, 255, 255, 0)',  # Cor da borda da legenda (transparente)
+				borderwidth=0,  # Largura da borda da legenda
+				xanchor='left',  # Ancoragem horizontal no centro
+				yanchor='top'  # Ancoragem vertical no topo
+			)
+		)
+		
+		fig.add_trace(trace_prec_hist, row=1, col=1)
+		fig.add_trace(trace_prec, row=1, col=1)
+		fig.add_trace(trace_temp_area, row=2, col=1)
+		fig.add_trace(trace_temp_hist, row=2, col=1)
+		fig.add_trace(trace_temp, row=2, col=1)
+		fig.add_trace(trace_sst_area, row=3, col=1)
+		fig.add_trace(trace_sst_hist, row=3, col=1)
+		fig.add_trace(trace_sst, row=3, col=1)
+
+	else:
+		fig = go.Figure()
+		
+		trace_prec = go.Bar(
+			x=month_names,
+			y=monthly_prec_avg['prec'],
+			name='Precipitation (%s)'%title_years,
+			marker=dict(color='rgba(0, 0, 0, 0.2)')
+		)
+		
+		trace_temp = go.Scatter(
+			x=month_names,
+			y=monthly_temp_avg,
+			mode='lines+markers',
+			name='Air Temp (%sh - %s)'%(hours_tit,title_years),
+			line=dict(color='rgb(67, 78, 150)'),
+			yaxis='y2'
+		)
+
+		trace_sst = go.Scatter(
+			x=month_names,
+			y=monthly_sst_avg,
+			mode='lines+markers',
+			name='Sea Temp (%s)'%title_years,
+			line=dict(color='rgb(220, 20, 60)'),
+			yaxis='y2'
+		)
+
+		fig.update_layout(
+			title=f'{tit.get(selected_location, 0)}',
+			yaxis=dict(title='Precipitation (mm/month)'),# range=[0, 200]),
+			yaxis2=dict(
+				title='Temperature (°C)',
+				overlaying='y',
+				side='right',
+				#range=[12, 32]
+			),
+			plot_bgcolor='white',
+			yaxis_gridcolor='lightgray',
+			yaxis_gridwidth=0.0001,
+			height=350,
+			width=400,
+			margin=dict(l=10, r=10, t=40, b=10),
+			legend=dict(
+				x=0,
+				y=-0.15,
+				orientation='h',
+				bgcolor='rgba(255, 255, 255, 0)',
+				traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
+				bordercolor='rgba(255, 255, 255, 0)',  # Cor da borda da legenda (transparente)
+				borderwidth=0,  # Largura da borda da legenda
+				xanchor='left',  # Ancoragem horizontal no centro
+				yanchor='top'  # Ancoragem vertical no topo
+			)
+		)
+	
+	
+		fig.add_trace(trace_prec)
+		fig.add_trace(trace_temp)
+		fig.add_trace(trace_sst)
+	
+	
 	return fig
 	
 
