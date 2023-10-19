@@ -2,7 +2,6 @@ import pandas as pd
 from numpy import select
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-import ast
 
 def load_data(location, years, type):
 	dataframes_list = []
@@ -10,16 +9,16 @@ def load_data(location, years, type):
 	for year in years:
 		
 		if type == 'ONDAS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
-			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		df['Datetime'] = pd.to_datetime(df['Datetime'])
@@ -625,11 +624,17 @@ def add_wind_type_column(df, onshore, side_onshore, offshore, side_offshore, sid
 
 def wind_type(df,selected_location):
 	
-	onshore = ast.literal_eval(df[df['location'] == selected_location]['onshore'].values[0])
-	offshore = ast.literal_eval(df[df['location'] == selected_location]['offshore'].values[0])
-	side = ast.literal_eval(df[df['location'] == selected_location]['side'].values[0])
-	side_onshore = ast.literal_eval(df[df['location'] == selected_location]['side_onshore'].values[0])
-	side_offshore = ast.literal_eval(df[df['location'] == selected_location]['side_offshore'].values[0])
+	onshore_str = df[df['location'] == selected_location]['onshore'].values[0]
+	offshore_str = df[df['location'] == selected_location]['offshore'].values[0]
+	side_str = df[df['location'] == selected_location]['side'].values[0]
+	side_onshore_str = df[df['location'] == selected_location]['side_onshore'].values[0]
+	side_offshore_str = df[df['location'] == selected_location]['side_offshore'].values[0]
+
+	onshore = onshore_str.split(';')
+	offshore = offshore_str.split(';')
+	side = side_str.split(';')
+	side_onshore = side_onshore_str.split(';')
+	side_offshore = side_offshore_str.split(';')
 	
 	return onshore, offshore, side, side_onshore, side_offshore
 	

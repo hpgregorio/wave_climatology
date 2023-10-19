@@ -1,19 +1,19 @@
 "location","menu","title","onshore","offshore","side","side_onshore","side_offshore","time_zone","lat","lon"
-"JERICOACOARA","BRAZIL - Jericoacoara/CE","Jericoacoara/CE (Brazil)","['N']","['S']","['W','E']","['NE','NW']","['SE','SW']",-3,-2.77,-40.52
-"SAOSEBASTIAO","BRAZIL - Sao Sebastiao/SP","Sao Sebastiao/SP (Brazil)","['SW','S']","['NE','N']","['W','E']","['SE']","['NW']",-3,-24.4,-45.5
+"JERICOACOARA","BRAZIL - Jericoacoara/CE","Jericoacoara/CE (Brazil)","N","S","W;E","NE;NW","SE;SW",-3,-2.77,-40.52
+"SAOSEBASTIAO","BRAZIL - Sao Sebastiao/SP","Sao Sebastiao/SP (Brazil)","SW;S","NE;N","W;E","SE","NW",-3,-24.4,-45.5
 "CABOVERDE","CABO VERDE - Sal Island","Sal Island (Cabo Verde)",,,,,,-7,16.575,-22.93
-"CRICANORTE","COSTA RICA - Guanacaste","Guanacaste (Costa Rica)","['W','SW']","['E','NE']","['NW','SE']","['S']","['N']",-6,10.1,-85.9
-"CRICASUL","COSTA RICA - Peninsula Osa","Peninsula Osa (Costa Rica)","['E']","['W']","['N','S']","['NE','SE']","['NW','SW']",-6,8.1,-83.2
-"ELSALVADOR","EL SALVADOR - El Tunco","El Tunco (El Salvador)","['S']","['N']","['W','E']","['SW','SE']","['NW','NE']",-6,13,-89.4
+"CRICANORTE","COSTA RICA - Guanacaste","Guanacaste (Costa Rica)","W;SW","E;NE","NW;SE","S","N",-6,10.1,-85.9
+"CRICASUL","COSTA RICA - Peninsula Osa","Peninsula Osa (Costa Rica)","E","W","N;S","NE;SE","NW;SW",-6,8.1,-83.2
+"ELSALVADOR","EL SALVADOR - El Tunco","El Tunco (El Salvador)","S","N","W;E","SW;SE","NW;NE",-6,13,-89.4
 "BALI","INDONESIA - Bali","Bali (Indonesia)",,,,,,8,-8.92,115.15
 "MENTAWAI","INDONESIA - Mentawai","Mentawai (Indonesia)",,,,,,8,-1.96,99
 "SUMBAWA","INDONESIA - Sumbawa","Sumbawa (Indonesia)",,,,,,8,-9.12,116.8
 "SALINACRUZ","MEXICO - Salina Cruz","Salina Cruz (Mexico)",,,,,,-6,16.11,-95.17
-"MARROCOSMIRLEFT","MOROCCO - Mirleft","Mirleft (Morocco)","['NW']","['SE']","['NE','SW']","['N','W']","['S','E']",1,29.5,-10.2
-"MARROCOSKAOKI","MOROCCO - Sidi Kaoki","Sidi Kaoki (Morocco)","['W']","['E']","['N','S']","['NW','SW']","['NE','SE']",1,30.55,-9.9
-"MARROCOSTAGHAZOUT","MOROCCO - Taghazout","Taghazout (Morocco)","['W']","['E']","['N','S']","['NW','SW']","['NE','SE']",1,30.4,-9.8
-"PACASMAYO","PERU - Pacasmayo","Pacasmayo (Peru)","['NW','W']","['SE','E']","['SW','NE']","['N']","['S']",-5,-7.4,-79.8
+"MARROCOSMIRLEFT","MOROCCO - Mirleft","Mirleft (Morocco)","NW","SE","NE;SW","N;W","S;E",1,29.5,-10.2
+"MARROCOSKAOKI","MOROCCO - Sidi Kaoki","Sidi Kaoki (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.55,-9.9
+"MARROCOSTAGHAZOUT","MOROCCO - Taghazout","Taghazout (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.4,-9.8
+"PACASMAYO","PERU - Pacasmayo","Pacasmayo (Peru)","NW;W","SE;E","SW;NE","N","S",-5,-7.4,-79.8
 "CLOUDNINE","PHILIPPINES - Cloud 9","Cloud 9 (Philippines)",,,,,,8,9.81,126.17
 "JEFREYS","SOUTH AFRICA - Jefrey's Bay","Jefrey's Bay (South Africa)",,,,,,2,-34.08,25
 "HUAHIN","THAILAND - Hua Hin","Hua Hin (Thailand)",,,,,,7,12.55,100.05
-"ELMERS","USA - Elmers Island/LA","Elmers Island/LA (USA)","['SE']","['NW']","['NE','SW']","['E','S']","['N','W']",-5,29.17,-90.5
+"ELMERS","USA - Elmers Island/LA","Elmers Island/LA (USA)","SE","NW","NE;SW","E;S","N;W",-5,29.17,-90.5
