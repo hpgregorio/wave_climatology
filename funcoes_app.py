@@ -2,6 +2,7 @@ import pandas as pd
 from numpy import select
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+import ast
 
 def load_data(location, years, type):
 	dataframes_list = []
@@ -9,23 +10,33 @@ def load_data(location, years, type):
 	for year in years:
 		
 		if type == 'ONDAS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
-			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		df['Datetime'] = pd.to_datetime(df['Datetime'])
 		dataframes_list.append(df)
 	return pd.concat(dataframes_list, ignore_index=True)
 	
-def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours=None):
+	
+	
+	
+def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours=None):
+
+	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
+	gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
+	if selected_years[0] == selected_years[-1]:
+		title_years = f"{selected_years[0]}"
+	else:
+		title_years = f"{selected_years[0]} to {selected_years[-1]}"
 	
 	if selected_hours is not None:
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
@@ -38,6 +49,9 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 
 		height_distribution = df_selected_hours.groupby([df_selected_hours['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
 
+		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		titul = f'{tit}<br>{nome_parametro} - {title_years} ({hours_tit}h)'
+		
 	else:
 		if parametro == 'CardinalDirection' or parametro == 'WindType':
 			df['Range'] = pd.Categorical(df[parametro], categories=bins, ordered=True)
@@ -45,14 +59,14 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 			df['Range'] = pd.cut(df[parametro], bins=bins, labels=labels, right=False)
 
 		height_distribution = df.groupby([df['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
+		
+		titul = f'{tit}<br>{nome_parametro} - {title_years}'
 	
 	# Calculando a porcentagem da distribuição
 	height_distribution_percentage = height_distribution.div(height_distribution.sum(axis=1), axis=0) * 100
 	
 	# Obtendo os nomes dos meses
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-	title_years = f"{selected_years[0]} to {selected_years[-1]}"
 
 	# Criando o gráfico de barras empilhadas com Plotly
 	traces = []
@@ -66,13 +80,14 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 		traces.append(trace)
 
 	layout = go.Layout(
-		title=f'{nome_parametro} - {title_years}',
+		title=titul,
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		legend=dict(title='', font=dict(size=10)),
 		barmode='stack',
-		height=350,
-		width=400,
-		plot_bgcolor='white',
+		height=300,
+		width=350,
+		margin=dict(l=10, r=10, t=80, b=10),
+		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
 	)
@@ -80,14 +95,31 @@ def plot_monthly_stats(df, selected_years, bins, labels, parametro, nome_paramet
 	fig = go.Figure(data=traces, layout=layout)
 	return fig
 
-def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours=None):
+
+
+
+def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours=None):
+
+	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
+	gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
+	
+	years = list(selected_years)  # Converter para lista
+	
+	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+	title_month = f"{month_names[mes-1]}"
+
 
 	if selected_hours is not None:
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
 		month_data = df_selected_hours[df_selected_hours['Datetime'].dt.month == mes]
 		
+		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		titul = f'{tit}<br>{nome_parametro} - {title_month} ({hours_tit}h)'
+		
 	else:
 		month_data = df[df['Datetime'].dt.month == mes]
+		
+		titul = f'{tit}<br>{nome_parametro} - {title_month}'
 
 	if parametro == 'CardinalDirection' or parametro == 'WindType':
 		month_data['Range'] = pd.Categorical(month_data[parametro], categories=bins, ordered=True)
@@ -96,10 +128,6 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 
 	month_height_distribution = month_data.groupby([month_data['Datetime'].dt.year, 'Range'])[parametro].count().unstack()
 	month_height_distribution_percentage = month_height_distribution.div(month_height_distribution.sum(axis=1), axis=0) * 100
-
-	years = list(selected_years)  # Converter para lista
-	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-	title_month = f"{month_names[mes-1]}"
 
 	traces = []
 	for col in month_height_distribution_percentage.columns:
@@ -112,13 +140,14 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 		traces.append(trace)
 
 	layout = go.Layout(
-		title=f'{nome_parametro} - {title_month}',
+		title=titul,
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		legend=dict(title='', font=dict(size=10)),
 		barmode='stack',
-		height=350,
-		width=400,
-		plot_bgcolor='white',
+		height=300,
+		width=350,
+		margin=dict(l=10, r=10, t=80, b=10),
+		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001
 	)
@@ -128,6 +157,8 @@ def plot_annual_stats(df, selected_years, mes, bins, labels, parametro, nome_par
 
 	fig = go.Figure(data=traces, layout=layout)
 	return fig
+	
+	
 
 def plot_custom_conditions_frequency(df, conditions, selected_years):
 	# Criando uma coluna para verificar se cada linha atende às condições
@@ -162,28 +193,24 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 	layout = go.Layout(
 		title=f'Occurency according with the conditions<br>- {title_years}',
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
-		plot_bgcolor='white',
+		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001,
-		height=350,
-		width=400,
+		height=300,
+		width=350,
+		margin=dict(l=10, r=10, t=70, b=10),
 	)
 
 	fig = go.Figure(data=[trace], layout=layout)
 	return fig
 
-def plot_others(df, df_sst, selected_years, selected_location, selected_hours=None):
 
-	tit = {'JERICOACOARA' : 'Jericoacoara/CE (Brazil)',
-		'SAOSEBASTIAO' : 'São Sebastião/SP (Brazil)',
-		'CRICANORTE' : 'Guanacaste (Costa Rica)',
-		'CRICASUL' : 'Peninsula Osa (Costa Rica)',
-		'ELSALVADOR' : 'El Tunco (El Salvador)',
-		'MARROCOSKAOKI' : 'Sidi Kaoki (Morrocco)',
-		'MARROCOSTAGHAZOUT' : 'Taghazout (Morrocco)',
-		'MARROCOSMIRLEFT' : 'Mirleft (Morrocco)',
-		'PACASMAYO' : 'Pacasmayo (Peru)',
-		'ELMERS' : 'Elmers Island/LA (USA)'}
+
+
+def plot_others(df_locais, df, df_sst, selected_years, selected_location, selected_hours=None):
+
+	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
+	gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
 	
 	if selected_years != list(range(1993, 2023 + 1)):
 		#####
@@ -205,7 +232,7 @@ def plot_others(df, df_sst, selected_years, selected_location, selected_hours=No
 			monthly_temp_avg_hist = df_selected_hours.groupby('Month')['temp'].mean()
 			monthly_temp_std_hist = df_selected_hours.groupby('Month')['temp'].std()
 			
-			hours_tit = 'h , '.join(['%1.0f' % val for val in selected_hours])
+			hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
 		else:
 			monthly_temp_avg_hist = df_temp_hist.groupby('Month')['temp'].mean()
 			monthly_temp_std_hist = df_temp_hist.groupby('Month')['temp'].std()
@@ -240,7 +267,7 @@ def plot_others(df, df_sst, selected_years, selected_location, selected_hours=No
 		
 		monthly_temp_avg = df_selected_hours.groupby('Month')['temp'].mean()
 		
-		hours_tit = 'h , '.join(['%1.0f' % val for val in selected_hours])
+		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
 	else:
 		monthly_temp_avg = df.groupby('Month')['temp'].mean()
 
@@ -268,7 +295,7 @@ def plot_others(df, df_sst, selected_years, selected_location, selected_hours=No
 	
 	if selected_years != list(range(1993, 2023 + 1)):
 
-		fig = make_subplots(rows=3, cols=1, shared_xaxes=False, subplot_titles=[f'{tit.get(selected_location, 0)}', ''], vertical_spacing=0.05)
+		fig = make_subplots(rows=3, cols=1, shared_xaxes=False, vertical_spacing=0.05)
 		
 		# Adicione barras para precipitação primeiro
 		trace_prec = go.Bar(
@@ -352,11 +379,11 @@ def plot_others(df, df_sst, selected_years, selected_location, selected_hours=No
 		)
 
 		fig.update_layout(
-			
+			title=tit,
 			yaxis=dict(title='Precipitation (mm/month)'),# range=[0, 200]),
 			yaxis2=dict(title='Air Temp (°C)'),
 			yaxis3=dict(title='Sea Temp (°C)'),
-			plot_bgcolor='white',
+			plot_bgcolor='rgba(255,255,255,0)',
 			yaxis_gridcolor='lightgray',
 			yaxis_gridwidth=0.0001,
 			yaxis2_gridcolor='lightgray',
@@ -416,16 +443,15 @@ def plot_others(df, df_sst, selected_years, selected_location, selected_hours=No
 			yaxis='y2'
 		)
 
-		fig.update_layout(
-			title=f'{tit.get(selected_location, 0)}',
+		fig.update_layout(title=tit,
 			yaxis=dict(title='Precipitation (mm/month)'),# range=[0, 200]),
 			yaxis2=dict(
-				title='Temperature (°C)',
+				title='Temp (°C)',
 				overlaying='y',
 				side='right',
 				#range=[12, 32]
 			),
-			plot_bgcolor='white',
+			plot_bgcolor='rgba(255,255,255,0)',
 			yaxis_gridcolor='lightgray',
 			yaxis_gridwidth=0.0001,
 			height=350,
@@ -454,14 +480,23 @@ def plot_others(df, df_sst, selected_years, selected_location, selected_hours=No
 	
 
 
-def plot_annual_stats_others(df, selected_years, mes, parametro, nome_parametro, selected_hours=None):
+def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome_parametro, selected_location, selected_hours=None):
 
+	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
+	gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
+	
+	years = list(selected_years)
+	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+	title_month = f"{month_names[mes-1]}"
+	
 	if selected_hours is not None:
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
 		month_data = df_selected_hours[df_selected_hours['Datetime'].dt.month == mes]
-		
+		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		titul = '%s - %s (%sh)'%(tit,title_month, hours_tit)
 	else:
 		month_data = df[df['Datetime'].dt.month == mes]
+		titul = '%s - %s'%(tit,title_month)
 
 	month_data['Year'] = month_data['Datetime'].dt.year
 	month_data['Month'] = month_data['Datetime'].dt.month
@@ -474,15 +509,10 @@ def plot_annual_stats_others(df, selected_years, mes, parametro, nome_parametro,
 		montly_average_year = month_data.groupby(['Year', month_data['Datetime'].dt.month])[parametro].mean()
 		montly_average_year = montly_average_year.reset_index()
 	
-	years = list(selected_years)
-	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-	title_month = f"{month_names[mes-1]}"
-
 	fig = go.Figure()
 	
 	if parametro == 'prec':
 		titulo = 'Precipitation (mm/month)';
-		limites = [0, 200]
 		trace = go.Bar(
 			x=years,
 			y=montly_average_year[parametro],
@@ -493,12 +523,11 @@ def plot_annual_stats_others(df, selected_years, mes, parametro, nome_parametro,
 	else:
 		if parametro == 'temp': 
 			line_color = 'rgb(67, 78, 150)'
-			titulo = 'Air Temperature (°C)'
+			titulo = 'Air Temp (°C)'
 		if parametro == 'sst': 
 			line_color = 'rgb(220, 20, 60)'
-			titulo = 'Sea Temperature (°C)'
+			titulo = 'Sea Temp (°C)'
 		
-		limites = [12, 32]
 		trace = go.Scatter(
 			x=years,
 			y=montly_average_year[parametro],
@@ -511,13 +540,14 @@ def plot_annual_stats_others(df, selected_years, mes, parametro, nome_parametro,
 	fig.add_trace(trace)
 	
 	layout = go.Layout(
-		title=f'{nome_parametro} - {title_month}',
-		yaxis=dict(title=titulo, range=limites),
-		plot_bgcolor='white',
+		title=titul,
+		yaxis=dict(title=titulo),
+		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001,
 		height=350,
 		width=400,
+		margin=dict(l=10, r=10, t=40, b=10),
 		legend=dict(
 			x=0.1,
 			y=-0.15,
@@ -536,12 +566,6 @@ def plot_annual_stats_others(df, selected_years, mes, parametro, nome_parametro,
 
 	fig = go.Figure(data=[trace], layout=layout)
 	return fig
-
-
-	
-
-	
-
 
 def plot_rose():
 
@@ -599,16 +623,55 @@ def add_wind_type_column(df, onshore, side_onshore, offshore, side_offshore, sid
 	df['WindType'] = select(conditions, choices, default=None)
 	return df		
 
-def wind_type(WIND_TYPES,selected_location):
-    return (
-        WIND_TYPES[selected_location]['onshore'],
-        WIND_TYPES[selected_location]['offshore'],
-        WIND_TYPES[selected_location]['side'],
-        WIND_TYPES[selected_location]['side_onshore'],
-        WIND_TYPES[selected_location]['side_offshore'],
-    )
+def wind_type(df,selected_location):
+	
+	onshore = ast.literal_eval(df[df['location'] == selected_location]['onshore'].values[0])
+	offshore = ast.literal_eval(df[df['location'] == selected_location]['offshore'].values[0])
+	side = ast.literal_eval(df[df['location'] == selected_location]['side'].values[0])
+	side_onshore = ast.literal_eval(df[df['location'] == selected_location]['side_onshore'].values[0])
+	side_offshore = ast.literal_eval(df[df['location'] == selected_location]['side_offshore'].values[0])
+	
+	return onshore, offshore, side, side_onshore, side_offshore
 	
 # Função para converter os horários de acordo com o GMT específico
 def converter_horarios_gmt(horarios, gmt):
 	horarios_convertidos = [(hora + gmt) % 24 for hora in horarios]
 	return horarios_convertidos
+	
+def plot_map(df):
+	fig = go.Figure(
+			data=go.Scattergeo(
+				lat = df['lat'],
+				lon = df['lon'],
+				text = df['menu'].astype(str),
+				marker = dict(
+					color = 'red',
+					size = 10
+				)
+			)
+    )
+
+	fig.update_geos(projection_type="orthographic",
+		resolution=110,
+		showcoastlines=True, coastlinecolor="Black", coastlinewidth=0.5,
+		showland=True, landcolor="rgb(212, 212, 212)", countrywidth=0.5,
+		#showocean=True, oceancolor="rgb(255, 255, 255)",
+		showcountries = True, countrycolor = "rgb(255, 255, 255)",
+		lonaxis = dict(
+			showgrid = True,
+			gridwidth = 0.5,
+			dtick=5
+		),
+		lataxis = dict (
+			showgrid = True,
+			gridwidth = 0.5,
+			dtick=5
+		)		
+	)
+
+	fig.update_layout(
+		height=300, 
+		margin={"r":0,"t":0,"l":0,"b":0},
+	)
+	return fig
+

@@ -6,98 +6,19 @@ from dash.exceptions import PreventUpdate
 
 import plotly.graph_objs as go
 
-from funcoes_app import load_data, plot_monthly_stats, plot_annual_stats, plot_custom_conditions_frequency, plot_others, plot_annual_stats_others, plot_rose, add_wind_type_column, wind_type, converter_horarios_gmt
+from funcoes_app import load_data, plot_monthly_stats, plot_annual_stats, plot_custom_conditions_frequency, plot_others, plot_annual_stats_others, plot_rose, add_wind_type_column, wind_type, converter_horarios_gmt, plot_map
 
-#app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP,dbc.themes.SPACELAB,dbc.icons.FONT_AWESOME])
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+import pandas as pd
+
+from dash_bootstrap_templates import load_figure_template
+
+load_figure_template("yeti")
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI])
 
 server = app.server
 
-WIND_TYPES = {
-    'JERICOACOARA': {
-        'onshore': ['N'],
-        'offshore': ['S'],
-        'side': ['W', 'E'],
-        'side_onshore': ['NE', 'NW'],
-        'side_offshore': ['SE', 'SW'],
-    },
-    'SAOSEBASTIAO': {
-        'onshore': ['SW', 'S'],
-        'offshore': ['NE', 'N'],
-        'side': ['W', 'E'],
-        'side_onshore': ['SE'],
-        'side_offshore': ['NW'],
-    },
-    'CRICANORTE': {
-        'onshore': ['W', 'SW'],
-        'offshore': ['E', 'NE'],
-        'side': ['NW', 'SE'],
-        'side_onshore': ['S'],
-        'side_offshore': ['N'],
-    },
-    'CRICASUL': {
-        'onshore': ['E'],
-        'offshore': ['W'],
-        'side': ['N', 'S'],
-        'side_onshore': ['NE', 'SE'],
-        'side_offshore': ['NW', 'SW'],
-    },
-    'ELSALVADOR': {
-        'onshore': ['S'],
-        'offshore': ['N'],
-        'side': ['W', 'E'],
-        'side_onshore': ['SW', 'SE'],
-        'side_offshore': ['NW', 'NE'],
-    },
-    'MARROCOSKAOKI': {
-        'onshore': ['W'],
-        'offshore': ['E'],
-        'side': ['N', 'S'],
-        'side_onshore': ['NW', 'SW'],
-        'side_offshore': ['NE', 'SE'],
-    },
-    'MARROCOSTAGHAZOUT': {
-        'onshore': ['W'],
-        'offshore': ['E'],
-        'side': ['N', 'S'],
-        'side_onshore': ['NW', 'SW'],
-        'side_offshore': ['NE', 'SE'],
-    },
-    'MARROCOSMIRLEFT': {
-        'onshore': ['NW'],
-        'offshore': ['SE'],
-        'side': ['NE', 'SW'],
-        'side_onshore': ['N', 'W'],
-        'side_offshore': ['S', 'E'],
-    },
-    'PACASMAYO': {
-        'onshore': ['NW', 'W'],
-        'offshore': ['SE', 'E'],
-        'side': ['SW', 'NE'],
-        'side_onshore': ['N'],
-        'side_offshore': ['S'],
-    },
-    'ELMERS': {
-        'onshore': ['SE'],
-        'offshore': ['NW'],
-        'side': ['NE', 'SW'],
-        'side_onshore': ['E', 'S'],
-        'side_offshore': ['N', 'W'],
-    },
-}
-
-TIME_ZONES = {
-    'JERICOACOARA': -3,
-    'SAOSEBASTIAO': -3,
-    'CRICANORTE': -6,
-    'CRICASUL': -6,
-    'ELSALVADOR': -6,
-    'MARROCOSKAOKI': +1,
-    'MARROCOSTAGHAZOUT': +1,
-    'MARROCOSMIRLEFT': +1,
-    'PACASMAYO': -5,
-    'ELMERS': -5,
-}
+df_locais = pd.read_csv('locais.csv');
 
 app.layout = dbc.Accordion([
 				dbc.AccordionItem(
@@ -113,22 +34,14 @@ app.layout = dbc.Accordion([
 							dbc.Container([
 							
 								html.Label("Location:"),
-								dcc.Dropdown(
-									id='location-dropdown',
-									options=[
-										{'label': 'BRAZIL (JERICOACOARA - 2.77S 40.52W)', 'value': 'JERICOACOARA'},
-										{'label': 'BRAZIL (SÃO SEBASTIÃO - 24.4S 45.5W)', 'value': 'SAOSEBASTIAO'},
-										{'label': 'COSTA RICA (GUANACASTE - 10.1N 85.9W)', 'value': 'CRICANORTE'},
-										{'label': 'COSTA RICA (PENINSULA OSA - 8.1N 83.2W)', 'value': 'CRICASUL'},
-										{'label': 'EL SALVADOR (EL TUNCO - 13N 89.4W)', 'value': 'ELSALVADOR'},
-										{'label': 'MARROCOS (SIDI KAOKI - 30.55N 9.9W)', 'value': 'MARROCOSKAOKI'},
-										{'label': 'MARROCOS (TAGHAZOUT - 30.4N 9.8W)', 'value': 'MARROCOSTAGHAZOUT'},
-										{'label': 'MARROCOS (MIRLEFT - 29.5N 10.2W)', 'value': 'MARROCOSMIRLEFT'},
-										{'label': 'PERU (PACASMAYO - 7.4S 79.8W)', 'value': 'PACASMAYO'},
-										{'label': 'USA (ELMERS ISLAND/LA - 29.17N 90.5W)', 'value': 'ELMERS'}
-									],
-									value='SAOSEBASTIAO'
-								),
+								
+								html.Div([
+									dcc.Dropdown(
+										id='location-dropdown',
+										options = [{'label': menu, 'value': location} for menu, location in zip(df_locais['menu'], df_locais['location'])],
+										value='SAOSEBASTIAO'
+									),
+								]),
 
 								html.Br(),
 
@@ -172,9 +85,13 @@ app.layout = dbc.Accordion([
 
 
 								html.Div([
+									html.Br(),
 									dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}),
+									
 									dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}),
+									
 									dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}),
+									html.Br(),
 									
 									html.Div([
 										html.Label("Cond. 1:		"),
@@ -195,7 +112,9 @@ app.layout = dbc.Accordion([
 										dcc.Input(id='direcao3', type='text', placeholder='Dir (none = ALL)', style={'maxWidth': '120px'}),
 									], style={'width': '100%', 'white-space': 'pre'}),
 								
+									html.Br(),
 									dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}),
+									html.Br(),
 									
 									html.Div([
 										html.Label("Select the month:"),
@@ -286,8 +205,11 @@ app.layout = dbc.Accordion([
 										),
 									]),
 									
+									html.Br(),
 									dcc.Graph(id='annual-stats-plot-prec', style={'width': '100%'}),
+									html.Br(),
 									dcc.Graph(id='annual-stats-plot-temp', style={'width': '100%'}),
+									html.Br(),
 									dcc.Graph(id='annual-stats-plot-sst', style={'width': '100%'}),
 											
 								], id="others-content", style={'display': 'none'}),
@@ -298,7 +220,11 @@ app.layout = dbc.Accordion([
 					title="Data",
 				),
 				dbc.AccordionItem(
-					"This is the content of the second section",
+					html.Div([
+						html.Br(),
+						dcc.Graph(id='map', style={'width': '100%'}),
+						html.Br(),
+					]),
 					title="About",
 				),
 				dbc.AccordionItem(
@@ -340,7 +266,8 @@ app.layout = dbc.Accordion([
 	 Output('tabs', 'active_tab'),
 	 Output('waves-content', 'style'),
 	 Output('wind-content', 'style'),
-	 Output('others-content', 'style')],
+	 Output('others-content', 'style'),
+	 Output('map', 'figure')],
 	#[Input('update-button', 'n_clicks'),
 	[Input('location-dropdown', 'value'),
 	 Input('start-year', 'value'),
@@ -374,6 +301,8 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 		df_wind = load_data(selected_location, anos, 'VENTOS')
 		df_sst = load_data(selected_location, anos, 'SST')
 		
+		fig_map = plot_map(df_locais)
+		
 		if active_tab == "waves":
 			bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
 			labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
@@ -387,8 +316,8 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			'2,0-2,5': 'rgb(129,0,111)',
 			'> 2,5': 'rgb(44,0,98)'}
 
-			fig1 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
-			fig4 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+			fig1 = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
+			fig4 = plot_annual_stats(df_locais, df, anos, selected_month, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 
 			bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 			labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
@@ -405,8 +334,8 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			'W': 'rgb(148,64,54)',
 			'NW': 'rgb(109,15,51)'}
 
-			fig2 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
-			fig5 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+			fig2 = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
+			fig5 = plot_annual_stats(df_locais, df, anos, selected_month, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 
 			bins = [0, 8, 10, 12, 14, 16, float('inf')]
 			labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
@@ -421,8 +350,8 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			'14-16': 'rgb(66,171,93)',
 			'> 16': 'rgb(0,69,41)'}
 
-			fig3 = plot_monthly_stats(df, anos, bins, labels, parametro, nome_parametro,bin_color_map)
-			fig6 = plot_annual_stats(df, anos, selected_month, bins, labels, parametro, nome_parametro,bin_color_map)
+			fig3 = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
+			fig6 = plot_annual_stats(df_locais, df, anos, selected_month, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 
 			conditions = [{'altura': altura1, 'periodo': periodo1, 'direcao': direcao1},
 			{'altura': altura2, 'periodo': periodo2, 'direcao': direcao2},
@@ -430,7 +359,7 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			
 			fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
 
-			return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
+			return [fig1, fig2, fig3, fig_custom_conditions, fig4, fig5, fig6, go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, fig_map]
 
 		elif active_tab == "wind":
 			bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
@@ -448,8 +377,8 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			'25-30': 'rgb(255,0,255)',
 			'> 30': 'rgb(143,10,40)'}
 
-			fig1_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro,bin_color_map,selected_hours)
-			fig4_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map, selected_hours)
+			fig1_w = plot_monthly_stats(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
+			fig4_w = plot_annual_stats(df_locais, df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
 			
 			bins = ['N', 'NE', 'NW', 'E', 'W', 'SW', 'SE', 'S']
 			
@@ -468,10 +397,10 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			'W': 'rgb(148,64,54)',
 			'NW': 'rgb(109,15,51)'}
 			
-			fig2a_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
-			fig5a_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map, selected_hours)
+			fig2a_w = plot_monthly_stats(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
+			fig5a_w = plot_annual_stats(df_locais, df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map, selected_location, selected_hours)
 			
-			onshore, offshore, side, side_onshore, side_offshore = wind_type(WIND_TYPES,selected_location);
+			onshore, offshore, side, side_onshore, side_offshore = wind_type(df_locais,selected_location);
 
 			# Adiciona a coluna 'WindType'
 			df_wind = add_wind_type_column(df_wind, onshore, side_onshore, offshore, side_offshore, side)
@@ -498,24 +427,27 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 			# Usar bin_color_map_filtered em vez do original
 			bin_color_map = bin_color_map_filtered
 			
-			fig2_w = plot_monthly_stats(df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_hours)
-			fig5_w = plot_annual_stats(df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map, selected_hours)
+			fig2_w = plot_monthly_stats(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
+			fig5_w = plot_annual_stats(df_locais, df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
 			
 			rose_w = plot_rose()
 
-			return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, rose_w, fig2a_w, fig2_w, fig4_w, fig5a_w, fig5_w, go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}]
+			return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig1_w, rose_w, fig2a_w, fig2_w, fig4_w, fig5a_w, fig5_w, go.Figure(), go.Figure(), go.Figure(), go.Figure(), active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, fig_map]
 
 		elif active_tab == "other":
 			
-			fig_other = plot_others(df_wind, df_sst, anos, selected_location, selected_hours_others)
+			fig_other = plot_others(df_locais, df_wind, df_sst, anos, selected_location, selected_hours_others)
 			
-			fig_other_prec = plot_annual_stats_others(df_wind, anos, selected_month_others, 'prec', 'Precipitation')
+			fig_other_prec = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'prec', 'Precipitation', selected_location)
 			
-			fig_other_temp = plot_annual_stats_others(df_wind, anos, selected_month_others, 'temp', 'Air Temp', selected_hours_others)
+			fig_other_temp = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'temp', 'Air Temp', selected_location, selected_hours_others)
 			
-			fig_other_sst = plot_annual_stats_others(df_wind, anos, selected_month_others, 'sst', 'Sea Temp')
+			fig_other_sst = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'sst', 'Sea Temp', selected_location)
 			
-			return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other, fig_other_prec, fig_other_temp, fig_other_sst, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}]
+			return [go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), fig_other, fig_other_prec, fig_other_temp, fig_other_sst, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, fig_map]
+			
+			
+		
 	
 # Callback para atualizar dinamicamente os rótulos dos horários
 @app.callback(
@@ -525,10 +457,10 @@ def update_plots(selected_location, start_year, end_year, selected_month, select
 	)
 def update_horarios_labels(selected_location):
 	horario_original = [0, 3, 6, 9, 12, 15, 18, 21];
-	horario_gmt = TIME_ZONES.get(selected_location, 0)
+	horario_gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
 	
 	horarios_convertidos = converter_horarios_gmt(horario_original, horario_gmt)
-	horarios_atualizados = [{'label': f' {hora:02d}h   ', 'value': original} for hora, original in zip(horarios_convertidos, horario_original)]
+	horarios_atualizados = [{'label': f' {hora[0]:02d}h   ', 'value': original} for hora, original in zip(horarios_convertidos, horario_original)]
 
 	return horarios_atualizados, horarios_atualizados
 	
