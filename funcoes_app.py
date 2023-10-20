@@ -390,7 +390,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			yaxis3_gridcolor='lightgray',
 			yaxis3_gridwidth=0.0001,
 			height=300*3,
-			width=400,
+			width=350,
 			margin=dict(l=10, r=10, t=40, b=10),
 			legend=dict(
 				x=-0.15,
@@ -453,8 +453,8 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			plot_bgcolor='rgba(255,255,255,0)',
 			yaxis_gridcolor='lightgray',
 			yaxis_gridwidth=0.0001,
-			height=350,
-			width=400,
+			height=300,
+			width=350,
 			margin=dict(l=10, r=10, t=40, b=10),
 			legend=dict(
 				x=0,
@@ -544,8 +544,8 @@ def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome
 		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
 		yaxis_gridwidth=0.0001,
-		height=350,
-		width=400,
+		height=300,
+		width=350,
 		margin=dict(l=10, r=10, t=40, b=10),
 		legend=dict(
 			x=0.1,
@@ -657,7 +657,7 @@ def plot_map(df):
     )
 
 	fig.update_geos(projection_type="orthographic",
-		resolution=110,
+		resolution=50,
 		showcoastlines=True, coastlinecolor="Black", coastlinewidth=0.5,
 		showland=True, landcolor="rgb(212, 212, 212)", countrywidth=0.5,
 		#showocean=True, oceancolor="rgb(255, 255, 255)",
