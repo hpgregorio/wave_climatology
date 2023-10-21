@@ -78,12 +78,12 @@ app.layout = dbc.Accordion([
 
 					html.Div([
 						html.Br(),
-						dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}),
+						dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False}),
 						
-						dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}),
-						dcc.Graph(id='rose_wind1', style={'width': '100%', 'display': 'center'}),
+						dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='rose_wind1', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 						
-						dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}),
+						dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False}),
 						html.Br(),
 						
 						html.Div([
@@ -106,7 +106,7 @@ app.layout = dbc.Accordion([
 						], style={'width': '100%', 'white-space': 'pre'}),
 					
 						html.Br(),
-						dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}),
+						dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}, config={'displayModeBar': False}),
 						html.Br(),
 						
 						html.Div([
@@ -121,10 +121,10 @@ app.layout = dbc.Accordion([
 							),
 						]),
 						
-						dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}),
-						dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}),
-						dcc.Graph(id='rose_wind2', style={'width': '100%', 'display': 'center'}),
-						dcc.Graph(id='annual-stats-plot-per', style={'width': '100%'}),
+						dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='rose_wind2', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='annual-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False}),
 					], id="waves-content", style={'display': 'block'}),
 					
 					html.Div([
@@ -144,13 +144,13 @@ app.layout = dbc.Accordion([
 							style={'white-space': 'pre'}
 						),	
 						
-						dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}),
+						dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False}),
 						
-						dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}),
-						dcc.Graph(id='rose_wind3', style={'width': '100%', 'display': 'center'}),
+						dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='rose_wind3', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 
 						
-						dcc.Graph(id='monthly-stats-plot-dir_wind_t', style={'width': '100%'}),
+						dcc.Graph(id='monthly-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False}),
 						
 						html.Div([
 							html.Label("Select the month:"),
@@ -164,10 +164,10 @@ app.layout = dbc.Accordion([
 							),
 						]),
 						
-						dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}),
-						dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}),
-						dcc.Graph(id='rose_wind4', style={'width': '100%', 'display': 'center'}),
-						dcc.Graph(id='annual-stats-plot-dir_wind_t', style={'width': '100%'}),
+						dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='rose_wind4', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='annual-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False}),
 					], id="wind-content", style={'display': 'none'}),	
 					
 					html.Div([
@@ -187,7 +187,7 @@ app.layout = dbc.Accordion([
 						),
 						
 						html.Br(),
-						dcc.Graph(id='other_anual_times', style={'width': '100%'}),
+						dcc.Graph(id='other_anual_times', style={'width': '100%'}, config={'displayModeBar': False}),
 						html.Br(),
 						
 						html.Div([
@@ -203,11 +203,11 @@ app.layout = dbc.Accordion([
 						]),
 						
 						html.Br(),
-						dcc.Graph(id='annual-stats-plot-prec', style={'width': '100%'}),
+						dcc.Graph(id='annual-stats-plot-prec', style={'width': '100%'}, config={'displayModeBar': False}),
 						html.Br(),
-						dcc.Graph(id='annual-stats-plot-temp', style={'width': '100%'}),
+						dcc.Graph(id='annual-stats-plot-temp', style={'width': '100%'}, config={'displayModeBar': False}),
 						html.Br(),
-						dcc.Graph(id='annual-stats-plot-sst', style={'width': '100%'}),
+						dcc.Graph(id='annual-stats-plot-sst', style={'width': '100%'}, config={'displayModeBar': False}),
 								
 					], id="others-content", style={'display': 'none'}),
 						

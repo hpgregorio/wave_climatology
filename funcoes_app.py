@@ -648,7 +648,8 @@ def plot_rose():
 		height=100,
 		width=100,
 		margin=dict(l=20, r=20, t=20, b=20)
-    )	
+    )
+	
 	return fig
 	
 def add_wind_type_column(df, onshore, side_onshore, offshore, side_offshore, side):
