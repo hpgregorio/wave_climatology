@@ -9,16 +9,16 @@ def load_data(location, years, type):
 	for year in years:
 		
 		if type == 'ONDAS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
-			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		df['Datetime'] = pd.to_datetime(df['Datetime'])
@@ -68,6 +68,7 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 	# Criando o gráfico de barras empilhadas com Plotly
+	
 	traces = []
 	for col in height_distribution_percentage.columns:
 		trace = go.Bar(
@@ -78,20 +79,41 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 		)
 		traces.append(trace)
 
-	layout = go.Layout(
-		title=titul,
-		yaxis=dict(title='Occurency (%)', range=[0, 100]),
-		legend=dict(title='', font=dict(size=10)),
-		barmode='stack',
-		height=300,
-		width=350,
-		margin=dict(l=10, r=10, t=80, b=10),
-		plot_bgcolor='rgba(255,255,255,0)',
-		yaxis_gridcolor='lightgray',
-		yaxis_gridwidth=0.0001
-	)
+	if parametro=='CardinalDirection':
+		layout = go.Layout(
+			showlegend=False,
+			title=titul,
+			yaxis=dict(title='Occurency (%)', range=[0, 100]),
+			barmode='stack',
+			height=330,
+			width=350,
+			margin=dict(l=10, r=10, t=80, b=10),
+			plot_bgcolor='rgba(255,255,255,0)',
+			yaxis_gridcolor='lightgray',
+			yaxis_gridwidth=0.0001
+		)
+	else:
+		layout = go.Layout(
+			title=titul,
+			yaxis=dict(title='Occurency (%)', range=[0, 100]),
+			legend=dict(
+				x=-0.15,
+				y=-0.15,
+				orientation='h',
+				title='',
+				font=dict(size=10)
+			),
+			barmode='stack',
+			height=380,
+			width=350,
+			margin=dict(l=10, r=10, t=80, b=10),
+			plot_bgcolor='rgba(255,255,255,0)',
+			yaxis_gridcolor='lightgray',
+			yaxis_gridwidth=0.0001
+		)
 
 	fig = go.Figure(data=traces, layout=layout)
+	
 	return fig
 
 
@@ -138,19 +160,39 @@ def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametr
 		)
 		traces.append(trace)
 
-	layout = go.Layout(
-		title=titul,
-		yaxis=dict(title='Occurency (%)', range=[0, 100]),
-		legend=dict(title='', font=dict(size=10)),
-		barmode='stack',
-		height=300,
-		width=350,
-		margin=dict(l=10, r=10, t=80, b=10),
-		plot_bgcolor='rgba(255,255,255,0)',
-		yaxis_gridcolor='lightgray',
-		yaxis_gridwidth=0.0001
-	)
-
+	if parametro=='CardinalDirection':
+		layout = go.Layout(
+			showlegend=False,
+			title=titul,
+			yaxis=dict(title='Occurency (%)', range=[0, 100]),
+			barmode='stack',
+			height=330,
+			width=350,
+			margin=dict(l=10, r=10, t=80, b=10),
+			plot_bgcolor='rgba(255,255,255,0)',
+			yaxis_gridcolor='lightgray',
+			yaxis_gridwidth=0.0001
+		)
+	else:
+		layout = go.Layout(
+			title=titul,
+			yaxis=dict(title='Occurency (%)', range=[0, 100]),
+			legend=dict(
+				x=-0.15,
+				y=-0.15,
+				orientation='h',
+				title='',
+				font=dict(size=10)
+			),
+			barmode='stack',
+			height=380,
+			width=350,
+			margin=dict(l=10, r=10, t=80, b=10),
+			plot_bgcolor='rgba(255,255,255,0)',
+			yaxis_gridcolor='lightgray',
+			yaxis_gridwidth=0.0001
+		)		
+		
 	years_ticks = list(selected_years)
 	layout.update(xaxis=dict(tickvals=years_ticks, ticktext=years_ticks, tickfont=dict(size=8)))
 
@@ -656,7 +698,7 @@ def plot_map(df):
 			)
     )
 
-	fig.update_geos(projection_type="orthographic",
+	fig.update_geos(#projection_type="orthographic",
 		resolution=50,
 		showcoastlines=True, coastlinecolor="Black", coastlinewidth=0.5,
 		showland=True, landcolor="rgb(212, 212, 212)", countrywidth=0.5,
