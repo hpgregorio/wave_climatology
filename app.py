@@ -139,7 +139,7 @@ app.layout = dbc.Accordion([
 						dcc.Dropdown(
 							id='horarios-checklist_wind',
 							options=[
-								{'label': f' {hora:02d}h   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
+								{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 							],
 							value=[],
 							multi=True,
@@ -181,7 +181,7 @@ app.layout = dbc.Accordion([
 						dcc.Dropdown(
 							id='horarios-checklist_sst',
 							options=[
-								{'label': f' {hora:02d}h   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
+								{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 							],
 							value=[],
 							multi=True,
@@ -220,6 +220,21 @@ app.layout = dbc.Accordion([
 	),
 	dbc.AccordionItem(
 		html.Div([
+			html.Label("WARNING"),
+			html.Br(),
+			html.Label("We are not responsible for any use or decisions made"),
+			html.Br(),
+			html.Label("based on the information provided by this website."),
+			html.Br(),
+			html.Label("All the data presented here is generated automatically"), 
+			html.Br(),
+			html.Label("and is intended for research, training, and general"), 
+			html.Br(),
+			html.Label("dissemination purposes."),
+			html.Br(),
+			html.Br(),
+			html.Label("Characteristics of the data used here:"),
+			html.Br(),
 			html.Table(className='responsive-table',
 				children=[
 					html.Thead(
@@ -241,7 +256,7 @@ app.layout = dbc.Accordion([
 							html.Td('Wind (10 m), Total Precipitation, Air Temperature (2 m)'),
 							html.Td('ERA5 Reanalysis (data assimilation and model forecasts)'),
 							html.Td('3 hours'),
-							html.Td('http://10.24381/cds.adbb2d47')
+							html.Td('https://doi.org/10.24381/cds.adbb2d47')
 						]),
 						html.Tr([
 							html.Td('Sea Surface Temperature (Sea Temp)'),
@@ -503,7 +518,7 @@ def update_horarios_labels(selected_location):
 	horario_gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
 	
 	horarios_convertidos = converter_horarios_gmt(horario_original, horario_gmt)
-	horarios_atualizados = [{'label': f' {hora[0]:02d}h   ', 'value': original} for hora, original in zip(horarios_convertidos, horario_original)]
+	horarios_atualizados = [{'label': f' {hora[0]:02d}:00   ', 'value': original} for hora, original in zip(horarios_convertidos, horario_original)]
 
 	return horarios_atualizados, horarios_atualizados
 	

@@ -9,16 +9,16 @@ def load_data(location, years, type):
 	for year in years:
 		
 		if type == 'ONDAS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
-			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
 		df = pd.read_csv(filename_csv)
 		df['Datetime'] = pd.to_datetime(df['Datetime'])
@@ -48,8 +48,8 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 
 		height_distribution = df_selected_hours.groupby([df_selected_hours['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
 
-		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
-		titul = f'{tit}<br>{nome_parametro} - {title_years} ({hours_tit}h)'
+		hours_tit = ':00 , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		titul = f'{tit}<br>{nome_parametro} - {title_years} ({hours_tit}:00)'
 		
 	else:
 		if parametro == 'CardinalDirection' or parametro == 'WindType':
@@ -134,8 +134,8 @@ def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametr
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
 		month_data = df_selected_hours[df_selected_hours['Datetime'].dt.month == mes]
 		
-		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
-		titul = f'{tit}<br>{nome_parametro} - {title_month} ({hours_tit}h)'
+		hours_tit = ':00 , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		titul = f'{tit}<br>{nome_parametro} - {title_month} ({hours_tit}:00)'
 		
 	else:
 		month_data = df[df['Datetime'].dt.month == mes]
@@ -273,7 +273,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			monthly_temp_avg_hist = df_selected_hours.groupby('Month')['temp'].mean()
 			monthly_temp_std_hist = df_selected_hours.groupby('Month')['temp'].std()
 			
-			hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+			hours_tit = ':00 , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
 		else:
 			monthly_temp_avg_hist = df_temp_hist.groupby('Month')['temp'].mean()
 			monthly_temp_std_hist = df_temp_hist.groupby('Month')['temp'].std()
@@ -289,7 +289,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		
 		# Calcule a média mensal ao longo dos anos
 		monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
-		monthly_prec_avg_hist = monthly_prec_avg*1000 #transformar para mm/mês (dado original está em m)
+		monthly_prec_avg_hist = monthly_prec_avg*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
 		
 		#####
 		#####
@@ -308,7 +308,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		
 		monthly_temp_avg = df_selected_hours.groupby('Month')['temp'].mean()
 		
-		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		hours_tit = ':00 , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
 	else:
 		monthly_temp_avg = df.groupby('Month')['temp'].mean()
 
@@ -321,7 +321,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 	
 	# Calcule a média mensal ao longo dos anos
 	monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
-	monthly_prec_avg = monthly_prec_avg*1000 #transformar para mm/mês (dado original está em m)
+	monthly_prec_avg = monthly_prec_avg*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
 	
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	if selected_years[0] == selected_years[-1]:
@@ -466,7 +466,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			x=month_names,
 			y=monthly_temp_avg,
 			mode='lines+markers',
-			name='Air Temp (%sh - %s)'%(hours_tit,title_years),
+			name='Air Temp (%s:00 - %s)'%(hours_tit,title_years),
 			line=dict(color='rgb(67, 78, 150)'),
 			yaxis='y2'
 		)
@@ -529,8 +529,8 @@ def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome
 	if selected_hours is not None:
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
 		month_data = df_selected_hours[df_selected_hours['Datetime'].dt.month == mes]
-		hours_tit = 'h , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
-		titul = '%s - %s (%sh)'%(tit,title_month, hours_tit)
+		hours_tit = ':00 , '.join(['%1.0f' % val for val in converter_horarios_gmt(selected_hours, gmt)])
+		titul = '%s - %s (%s:00)'%(tit,title_month, hours_tit)
 	else:
 		month_data = df[df['Datetime'].dt.month == mes]
 		titul = '%s - %s'%(tit,title_month)
@@ -540,7 +540,7 @@ def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome
 	
 	if parametro == 'prec': 
 		monthly_prec_sum = month_data.groupby(['Year'])['prec'].sum().reset_index()
-		montly_average_year = monthly_prec_sum *1000
+		montly_average_year = monthly_prec_sum *3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
 	
 	else:
 		montly_average_year = month_data.groupby(['Year', month_data['Datetime'].dt.month])[parametro].mean()

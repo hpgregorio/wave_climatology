@@ -1,7 +1,8 @@
 .responsive-table {
-  max-width: 300px;
+  max-width: 250px;
   word-wrap: break-word;
-  margin: 20px; /* Add the unit (e.g., px) */
+  margin: 0px;
+  font-size: 9px
 }
 
 .responsive-table td {
@@ -23,9 +24,9 @@
 }
 
 .responsive-table tr:hover {
-  background-color: lightgray;
+  background-color: rgba(212,212,212,1);
 }
 
 .responsive-table td:hover {
-  background-color: lightgray;
+  background-color: rgba(220,220,220,1);
 }
