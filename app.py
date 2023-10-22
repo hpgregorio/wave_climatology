@@ -219,19 +219,18 @@ app.layout = dbc.Accordion([
 		title="Data",
 	),
 	dbc.AccordionItem(
-		html.Div(style={'max-width': '300px'},
+		html.Div(style={'max-width': '350px'},
 			children=[
 			
 				html.Div([
-					html.Img(src='/assets/logo.png')
-				]),
-				html.Label("Decide when it is time to (take your) board!",style={'font-style': 'italic','color':'rgba(64,183,173,1)',}),
+					html.Img(src='/assets/logo.png', style={'text-align': 'center'}),
+					html.Label("Decide when it is time to (take your) board!",style={'font-style': 'italic','color':'rgba(64,183,173,1)',}),
+				], style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}),
 				html.Br(),
-				html.Br(),
-				html.Label("WARNING:",style={'font-weight':'bold'}),
-				html.Br(),
-				html.Label("We are not responsible for any use or decisions made based on the information provided by this website. All the data presented here is generated automatically and is intended for research, training, and general dissemination purposes."),
-				html.Br(),
+				html.Div([
+					html.Label("WARNING",style={'font-weight':'bold'}),
+					html.Label("We are not responsible for any use or decisions made based on the information provided by this website. All the data presented here is generated automatically and is intended for research, training, and general dissemination purposes.",style={'font-style': 'italic', 'text-align': 'center'}),
+				], style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}),
 				html.Br(),
 				html.Label("Characteristics of the data used here:"),
 				html.Br(),
@@ -269,7 +268,7 @@ app.layout = dbc.Accordion([
 				),
 				html.Br(),
 				html.Label("Locations where the analyses are available (for suggestions, contact me):"),
-				html.Div(className='map',
+				html.Div(className='map', 
 					children = [
 						dcc.Graph(id='map', config={'displayModeBar': False}),
 					],
@@ -283,7 +282,7 @@ app.layout = dbc.Accordion([
 		html.A(
 			dbc.Row(
 				[
-					dbc.Col(dbc.NavbarBrand("hpgregorio.net", className="ms-2")),
+					dbc.Col(dbc.NavbarBrand("https://hpgregorio.net", className="ms-2")),
 				],
 				align="center",
 				className="g-0",
