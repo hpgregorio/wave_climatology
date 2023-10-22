@@ -10,7 +10,7 @@ from dash_bootstrap_templates import load_figure_template
 
 load_figure_template("yeti")
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI,'/assets/typography.css'])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI,'/assets/typography.css'], title='When2board - HPGregorio.net')
 server = app.server
 
 df_locais = pd.read_csv('locais.csv');
@@ -220,7 +220,12 @@ app.layout = dbc.Accordion([
 	),
 	dbc.AccordionItem(
 		html.Div([
-			html.Label("WARNING"),
+			
+			html.Div([
+				html.Img(src='/assets/logo.png')
+			]),
+		
+			html.Label("WARNING:",style={'font-weight':'bold'}),
 			html.Br(),
 			html.Label("We are not responsible for any use or decisions made"),
 			html.Br(),
@@ -288,6 +293,7 @@ app.layout = dbc.Accordion([
 				className="g-0",
 			),
 			href="https://hpgregorio.net",
+			target="_blank", 
 			style={"textDecoration": "none",'backgroundColor': 'rgba(244,241,214,1)'},
 		),
 		title="Contact",
