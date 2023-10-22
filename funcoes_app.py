@@ -323,10 +323,6 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 	monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
 	monthly_prec_avg = monthly_prec_avg*1000 #transformar para mm/mês (dado original está em m)
 	
-	
-	
-	
-	
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	if selected_years[0] == selected_years[-1]:
 		title_years = f"{selected_years[0]}"
@@ -708,12 +704,12 @@ def plot_map(df):
 		lonaxis = dict(
 			showgrid = True,
 			gridwidth = 0.5,
-			dtick=5
+			dtick=10
 		),
 		lataxis = dict (
 			showgrid = True,
 			gridwidth = 0.5,
-			dtick=5
+			dtick=10
 		)		
 	)
 

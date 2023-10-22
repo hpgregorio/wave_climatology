@@ -10,7 +10,7 @@ from dash_bootstrap_templates import load_figure_template
 
 load_figure_template("yeti")
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI,'/assets/typography.css'])
 server = app.server
 
 df_locais = pd.read_csv('locais.csv');
@@ -75,7 +75,7 @@ app.layout = dbc.Accordion([
 						dbc.Tab(label="Others", tab_id="other"),
 					],
 					id="tabs",
-					active_tab=None,
+					active_tab="waves",
 					),
 
 					html.Div([
@@ -220,8 +220,45 @@ app.layout = dbc.Accordion([
 	),
 	dbc.AccordionItem(
 		html.Div([
+			html.Table(className='responsive-table',
+				children=[
+					html.Thead(
+						html.Tr([
+							html.Th('Parameter'),
+							html.Th('Source'),
+							html.Th('Time resolution'),
+							html.Th('Data link')
+						])
+					),
+					html.Tbody([
+						html.Tr([
+							html.Td('Waves'),
+							html.Td('E.U. Copernicus Marine Service Information - Global Ocean Waves Reanalysis (data assimilation and model forecasts)'),
+							html.Td('3 hours'),
+							html.Td(['1993-2021: https://doi.org/10.48670/moi-00022', html.Br(), html.Br(), '2022-2023: https://doi.org/10.48670/moi-00017'])
+						]),
+						html.Tr([
+							html.Td('Wind (10 m), Total Precipitation, Air Temperature (2 m)'),
+							html.Td('ERA5 Reanalysis (data assimilation and model forecasts)'),
+							html.Td('3 hours'),
+							html.Td('http://10.24381/cds.adbb2d47')
+						]),
+						html.Tr([
+							html.Td('Sea Surface Temperature (Sea Temp)'),
+							html.Td('E.U. Copernicus Marine Service Information - Global Ocean OSTIA Sea Surface Temperature and Sea Ice Reprocessed (Satellite and in-situ data)'),
+							html.Td('Daily'),
+							html.Td(['1993-2021: https://doi.org/10.48670/moi-00168', html.Br(), html.Br(), '2022-2023: https://doi.org/10.48670/moi-00165'])
+						])
+					])
+				],
+			),
 			html.Br(),
-			dcc.Graph(id='map', style={'width': '100%'}),
+			html.Label("Locations where the analyses are available (for suggestions, contact me):"),
+			html.Div(className='map',
+				children = [
+					dcc.Graph(id='map', config={'displayModeBar': False}),
+				],
+			),
 			html.Br(),
 		]),
 		title="About",
@@ -296,6 +333,9 @@ def update_plots(n_clicks,  selected_location, start_year, end_year, selected_mo
 	button_clicked = ctx.triggered_id
 	
 	if button_clicked:
+		
+
+		# Check if the button was clicked
 		if n_clicks == 0:
 			raise PreventUpdate
 

@@ -1,0 +1,31 @@
+.responsive-table {
+  max-width: 300px;
+  word-wrap: break-word;
+  margin: 20px; /* Add the unit (e.g., px) */
+}
+
+.responsive-table td {
+  border-bottom: solid 0.5px;
+  vertical-align: center;
+  padding: 15px;
+}
+
+.responsive-table th {
+  border-bottom: solid 0.5px;
+  vertical-align: center;
+  text-align: center;
+  padding: 15px;
+}
+
+.responsive-table tr {
+  text-align: left;
+  padding: 15px;
+}
+
+.responsive-table tr:hover {
+  background-color: lightgray;
+}
+
+.responsive-table td:hover {
+  background-color: lightgray;
+}
