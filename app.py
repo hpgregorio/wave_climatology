@@ -22,7 +22,7 @@ app.layout = dbc.Accordion([
 	dbc.AccordionItem(
 		dcc.Loading(
 			id="loading-container",
-			type='default',
+			type='circle',
 			fullscreen=True,
 			color='rgba(64,183,173,1)',
 			style={'backgroundColor': None},
@@ -219,68 +219,64 @@ app.layout = dbc.Accordion([
 		title="Data",
 	),
 	dbc.AccordionItem(
-		html.Div([
+		html.Div(style={'max-width': '300px'},
+			children=[
 			
-			html.Div([
-				html.Img(src='/assets/logo.png')
-			]),
-		
-			html.Label("WARNING:",style={'font-weight':'bold'}),
-			html.Br(),
-			html.Label("We are not responsible for any use or decisions made"),
-			html.Br(),
-			html.Label("based on the information provided by this website."),
-			html.Br(),
-			html.Label("All the data presented here is generated automatically"), 
-			html.Br(),
-			html.Label("and is intended for research, training, and general"), 
-			html.Br(),
-			html.Label("dissemination purposes."),
-			html.Br(),
-			html.Br(),
-			html.Label("Characteristics of the data used here:"),
-			html.Br(),
-			html.Table(className='responsive-table',
-				children=[
-					html.Thead(
-						html.Tr([
-							html.Th('Parameter'),
-							html.Th('Source'),
-							html.Th('Time resolution'),
-							html.Th('Data link')
+				html.Div([
+					html.Img(src='/assets/logo.png')
+				]),
+				html.Label("Decide when it is time to (take your) board!",style={'font-style': 'italic','color':'rgba(64,183,173,1)',}),
+				html.Br(),
+				html.Br(),
+				html.Label("WARNING:",style={'font-weight':'bold'}),
+				html.Br(),
+				html.Label("We are not responsible for any use or decisions made based on the information provided by this website. All the data presented here is generated automatically and is intended for research, training, and general dissemination purposes."),
+				html.Br(),
+				html.Br(),
+				html.Label("Characteristics of the data used here:"),
+				html.Br(),
+				html.Table(className='responsive-table',
+					children=[
+						html.Thead(
+							html.Tr([
+								html.Th('Parameter'),
+								html.Th('Source'),
+								html.Th('Time resolution'),
+								html.Th('Data link')
+							])
+						),
+						html.Tbody([
+							html.Tr([
+								html.Td('Waves'),
+								html.Td('E.U. Copernicus Marine Service Information - Global Ocean Waves Reanalysis (data assimilation and model forecasts)'),
+								html.Td('3 hours'),
+								html.Td(['1993-2021: https://doi.org/10.48670/moi-00022', html.Br(), html.Br(), '2022-2023: https://doi.org/10.48670/moi-00017'])
+							]),
+							html.Tr([
+								html.Td('Wind (10 m), Total Precipitation, Air Temperature (2 m)'),
+								html.Td('ERA5 Reanalysis (data assimilation and model forecasts)'),
+								html.Td('3 hours'),
+								html.Td('https://doi.org/10.24381/cds.adbb2d47')
+							]),
+							html.Tr([
+								html.Td('Sea Surface Temperature (Sea Temp)'),
+								html.Td('E.U. Copernicus Marine Service Information - Global Ocean OSTIA Sea Surface Temperature and Sea Ice Reprocessed (Satellite and in-situ data)'),
+								html.Td('Daily'),
+								html.Td(['1993-2021: https://doi.org/10.48670/moi-00168', html.Br(), html.Br(), '2022-2023: https://doi.org/10.48670/moi-00165'])
+							])
 						])
-					),
-					html.Tbody([
-						html.Tr([
-							html.Td('Waves'),
-							html.Td('E.U. Copernicus Marine Service Information - Global Ocean Waves Reanalysis (data assimilation and model forecasts)'),
-							html.Td('3 hours'),
-							html.Td(['1993-2021: https://doi.org/10.48670/moi-00022', html.Br(), html.Br(), '2022-2023: https://doi.org/10.48670/moi-00017'])
-						]),
-						html.Tr([
-							html.Td('Wind (10 m), Total Precipitation, Air Temperature (2 m)'),
-							html.Td('ERA5 Reanalysis (data assimilation and model forecasts)'),
-							html.Td('3 hours'),
-							html.Td('https://doi.org/10.24381/cds.adbb2d47')
-						]),
-						html.Tr([
-							html.Td('Sea Surface Temperature (Sea Temp)'),
-							html.Td('E.U. Copernicus Marine Service Information - Global Ocean OSTIA Sea Surface Temperature and Sea Ice Reprocessed (Satellite and in-situ data)'),
-							html.Td('Daily'),
-							html.Td(['1993-2021: https://doi.org/10.48670/moi-00168', html.Br(), html.Br(), '2022-2023: https://doi.org/10.48670/moi-00165'])
-						])
-					])
-				],
-			),
-			html.Br(),
-			html.Label("Locations where the analyses are available (for suggestions, contact me):"),
-			html.Div(className='map',
-				children = [
-					dcc.Graph(id='map', config={'displayModeBar': False}),
-				],
-			),
-			html.Br(),
-		]),
+					],
+				),
+				html.Br(),
+				html.Label("Locations where the analyses are available (for suggestions, contact me):"),
+				html.Div(className='map',
+					children = [
+						dcc.Graph(id='map', config={'displayModeBar': False}),
+					],
+				),
+				html.Br(),
+			],
+		),
 		title="About",
 	),
 	dbc.AccordionItem(
