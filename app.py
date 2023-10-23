@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
-from funcoes_app import load_data, plot_monthly_stats, plot_annual_stats, plot_custom_conditions_frequency, plot_others, plot_annual_stats_others, plot_rose, add_wind_type_column, wind_type, converter_horarios_gmt, plot_map
+from funcoes_app import load_data, plot_monthly_stats, plot_annual_stats, plot_custom_conditions_frequency, plot_others, plot_annual_stats_others, plot_rose, add_wind_type_column, wind_type, converter_horarios_gmt, plot_map, plot_wind_hours, plot_others_hour
 import pandas as pd
 from dash_bootstrap_templates import load_figure_template
 
@@ -80,12 +80,12 @@ app.layout = dbc.Accordion([
 
 					html.Div([
 						html.Br(),
-						dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						
-						dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind1', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 						
-						dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
 						
 						html.Div([
@@ -108,7 +108,7 @@ app.layout = dbc.Accordion([
 						], style={'width': '100%', 'white-space': 'pre'}),
 					
 						html.Br(),
-						dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
 						
 						html.Div([
@@ -123,10 +123,10 @@ app.layout = dbc.Accordion([
 							),
 						]),
 						
-						dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False}),
-						dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind2', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
-						dcc.Graph(id='annual-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 					], id="waves-content", style={'display': 'block'}),
 					
 					html.Div([
@@ -134,25 +134,22 @@ app.layout = dbc.Accordion([
 						html.Br(),
 						html.Label("Select the hours of the day to analyze the wind"),
 						html.Br(),
-						html.Label("(local time - more than one = average):"),
+						html.Label("(LOCAL TIME - more than one = average):"),
 
 						dcc.Dropdown(
 							id='horarios-checklist_wind',
 							options=[
 								{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 							],
-							value=[],
+							value=[12],
 							multi=True,
 							style={'white-space': 'pre'}
 						),	
 						
-						dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False}),
-						
-						dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind3', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
-
-						
-						dcc.Graph(id='monthly-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='monthly-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						
 						html.Div([
 							html.Label("Select the month:"),
@@ -166,30 +163,37 @@ app.layout = dbc.Accordion([
 							),
 						]),
 						
-						dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False}),
-						dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='hour-month-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='hour-month-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='rose_wind4a', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='hour-month-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+
+						dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind4', style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
-						dcc.Graph(id='annual-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+
+						
 					], id="wind-content", style={'display': 'none'}),	
 					
 					html.Div([
 						html.Br(),
 						html.Label("Select the hours of the day to analyze the air"),
 						html.Br(),
-						html.Label("temperature (local time - more than one = average):"),
+						html.Label("temperature (LOCAL TIME - more than one = average):"),
 
 						dcc.Dropdown(
 							id='horarios-checklist_sst',
 							options=[
 								{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
 							],
-							value=[],
+							value=[9],
 							multi=True,
 							style={'white-space': 'pre'}
 						),
 						
 						html.Br(),
-						dcc.Graph(id='other_anual_times', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='other_anual_times', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
 						
 						html.Div([
@@ -205,11 +209,14 @@ app.layout = dbc.Accordion([
 						]),
 						
 						html.Br(),
-						dcc.Graph(id='annual-stats-plot-prec', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='other_times', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						
 						html.Br(),
-						dcc.Graph(id='annual-stats-plot-temp', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-prec', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
-						dcc.Graph(id='annual-stats-plot-sst', style={'width': '100%'}, config={'displayModeBar': False}),
+						dcc.Graph(id='annual-stats-plot-temp', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
+						html.Br(),
+						dcc.Graph(id='annual-stats-plot-sst', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 								
 					], id="others-content", style={'display': 'none'}),
 						
@@ -229,7 +236,7 @@ app.layout = dbc.Accordion([
 				html.Br(),
 				html.Div([
 					html.Label("WARNING",style={'font-weight':'bold'}),
-					html.Label("We are not responsible for any use or decisions made based on the information provided by this website. All the data presented here is generated automatically and is intended for research, training, and general dissemination purposes.",style={'font-style': 'italic', 'text-align': 'center'}),
+					html.Label("We are not responsible for any use or decisions made based on the information provided by this website. All the data presented here is generated automatically and is intended for research, training, and general dissemination purposes only.",style={'font-style': 'italic', 'text-align': 'center'}),
 				], style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}),
 				html.Br(),
 				html.Label("Characteristics of the data used here:"),
@@ -280,13 +287,7 @@ app.layout = dbc.Accordion([
 	),
 	dbc.AccordionItem(
 		html.A(
-			dbc.Row(
-				[
-					dbc.Col(dbc.NavbarBrand("https://hpgregorio.net", className="ms-2")),
-				],
-				align="center",
-				className="g-0",
-			),
+			dbc.Row([dbc.Col(dbc.NavbarBrand("https://hpgregorio.net", className="ms-2"))], align="center",	className="g-0"),
 			href="https://hpgregorio.net",
 			target="_blank", 
 			style={"textDecoration": "none",'backgroundColor': 'rgba(244,241,214,1)'},
@@ -314,7 +315,12 @@ app.layout = dbc.Accordion([
 	 Output('annual-stats-plot-dir_wind', 'figure'),
 	 Output('rose_wind4', 'figure'),
 	 Output('annual-stats-plot-dir_wind_t', 'figure'),
+	 Output('hour-month-plot-int_wind', 'figure'),
+	 Output('hour-month-plot-dir_wind', 'figure'),
+	 Output('rose_wind4a', 'figure'),
+	 Output('hour-month-plot-dir_wind_t', 'figure'),
 	 Output('other_anual_times', 'figure'),
+	 Output('other_times', 'figure'),
 	 Output('annual-stats-plot-prec', 'figure'),
 	 Output('annual-stats-plot-temp', 'figure'),
 	 Output('annual-stats-plot-sst', 'figure'),
@@ -349,17 +355,15 @@ def update_plots(n_clicks,  selected_location, start_year, end_year, selected_mo
 	button_clicked = ctx.triggered_id
 	
 	if button_clicked:
-		
-
 		# Check if the button was clicked
-		if n_clicks == 0:
-			raise PreventUpdate
+		#if n_clicks == 0:
+		#	raise PreventUpdate
 
 		anos = list(range(start_year, end_year + 1))
 
 		if active_tab == "waves":
 		
-			df = load_data(selected_location, anos, 'ONDAS')
+			df = load_data(selected_location, anos, 'ONDAS', df_locais)
 			
 			bins = [0, 1.0, 1.5, 2.0, 2.5, float('inf')]
 			labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
@@ -416,11 +420,11 @@ def update_plots(n_clicks,  selected_location, start_year, end_year, selected_mo
 			
 			fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
 
-			return [fig1, fig2, rose, fig3, fig_custom_conditions, fig4, fig5, rose, fig6, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update,  no_update, active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, fig_map,0]
+			return [fig1, fig2, rose, fig3, fig_custom_conditions, fig4, fig5, rose, fig6] + [no_update]*12 + [no_update]*5 + [active_tab, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, fig_map, 0]
 
 		elif active_tab == "wind":
 		
-			df_wind = load_data(selected_location, anos, 'VENTOS')
+			df_wind = load_data(selected_location, anos, 'VENTOS', df_locais)
 			
 			bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
 			labels = ['< 6', '6-12', '12-15', '15-18', '18-21', '21-25', '25-30', '> 30']
@@ -439,6 +443,8 @@ def update_plots(n_clicks,  selected_location, start_year, end_year, selected_mo
 
 			fig1_w = plot_monthly_stats(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
 			fig4_w = plot_annual_stats(df_locais, df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
+			#fig6_w = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location);
+			fig6a_w = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_month_wind);
 			
 			bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 			labels = bins
@@ -458,6 +464,8 @@ def update_plots(n_clicks,  selected_location, start_year, end_year, selected_mo
 			
 			fig2a_w = plot_monthly_stats(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
 			fig5a_w = plot_annual_stats(df_locais, df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro,bin_color_map, selected_location, selected_hours)
+			#fig7_w = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location);
+			fig7a_w = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_month_wind);
 			
 			onshore, offshore, side, side_onshore, side_offshore = wind_type(df_locais,selected_location);
 
@@ -488,40 +496,46 @@ def update_plots(n_clicks,  selected_location, start_year, end_year, selected_mo
 			
 			fig2_w = plot_monthly_stats(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
 			fig5_w = plot_annual_stats(df_locais, df_wind, anos, selected_month_wind, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours)
+			#fig8_w = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location);
+			fig8a_w = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_month_wind);
 			
-			return [no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, fig1_w, fig2a_w, rose, fig2_w, fig4_w, fig5a_w, rose, fig5_w, no_update, no_update, no_update, no_update, active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, fig_map,0]
+			return [no_update]*9 + [fig1_w, fig2a_w, rose, fig2_w, fig4_w, fig5a_w, rose, fig5_w, fig6a_w, fig7a_w, rose, fig8a_w] + [no_update]*5 + [active_tab, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, fig_map,0]
 
 		elif active_tab == "other":
 		
-			df_wind = load_data(selected_location, anos, 'VENTOS')
-			df_sst = load_data(selected_location, anos, 'SST')
+			df_wind = load_data(selected_location, anos, 'VENTOS', df_locais)
+			df_sst = load_data(selected_location, anos, 'SST', df_locais)
 				
 			fig_other = plot_others(df_locais, df_wind, df_sst, anos, selected_location, selected_hours_others)
-			
 			fig_other_prec = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'prec', 'Precipitation', selected_location)
-			
 			fig_other_temp = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'temp', 'Air Temp', selected_location, selected_hours_others)
-			
 			fig_other_sst = plot_annual_stats_others(df_locais, df_sst, anos, selected_month_others, 'sst', 'Sea Temp', selected_location)
+			fig_other_hourly = plot_others_hour(df_locais, df_wind, anos, selected_location, selected_month_others)
 			
-			return [no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update,  no_update,  no_update,  no_update, fig_other, fig_other_prec, fig_other_temp, fig_other_sst, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, fig_map,0]
+			return [no_update]*9 + [no_update]*12 + [fig_other, fig_other_hourly, fig_other_prec, fig_other_temp, fig_other_sst] + [active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, fig_map, 0]
+
 	else:
-		return [no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update,  no_update, active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, fig_map, 0]
+		return [no_update]*9 + [no_update]*12 + [no_update]*5 + [active_tab, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, fig_map, 0]
 	
-# Callback para atualizar dinamicamente os rótulos dos horários
+# Callback para atualizar dinamicamente os rótulos dos horários para hora local
 @app.callback(
 	[Output('horarios-checklist_wind', 'options'),
-	Output('horarios-checklist_sst', 'options')],
+	Output('horarios-checklist_wind', 'value'),
+	Output('horarios-checklist_sst', 'options'),
+	Output('horarios-checklist_sst', 'value'),],
 	[Input('location-dropdown', 'value')]
 	)
 def update_horarios_labels(selected_location):
 	horario_original = [0, 3, 6, 9, 12, 15, 18, 21];
 	horario_gmt = df_locais[df_locais['location'] == selected_location]['time_zone'].values
 	
-	horarios_convertidos = converter_horarios_gmt(horario_original, horario_gmt)
-	horarios_atualizados = [{'label': f' {hora[0]:02d}:00   ', 'value': original} for hora, original in zip(horarios_convertidos, horario_original)]
+	horarios_convertidos = sorted(converter_horarios_gmt(horario_original, horario_gmt))
+	
+	closest = min(horarios_convertidos, key=lambda x: abs(x[0] - 9))
+	
+	horarios_atualizados = [{'label': f' {hora[0]:02d}:00   ', 'value': hora[0]} for hora in horarios_convertidos]
 
-	return horarios_atualizados, horarios_atualizados
+	return  horarios_atualizados, [closest[0]], horarios_atualizados, [closest[0]]
 	
 if __name__ == '__main__':
 	app.run_server(debug=True)
