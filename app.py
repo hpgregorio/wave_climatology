@@ -60,7 +60,7 @@ app.layout = dbc.Accordion([
 						html.Div(children=' ', style={'margin': '0 10px'}),
 						
 						html.Div([
-							dbc.Button("Update Graphs", id="update-button", n_clicks=0, color='info'),
+							dbc.Button("Update Graphs", id="update-button", n_clicks=0, color='info', outline=True),
 							], 
 						#id="floating-button-container", style={"position": "fixed", "top": "175px", "right": "50px", "zIndex": 1000}),
 						id="floating-button-container"),
