@@ -3,6 +3,8 @@ from numpy import select
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from datetime import timedelta
+import requests
+import io
 
 def load_data(location, years, type, df_locais):
 
@@ -15,17 +17,28 @@ def load_data(location, years, type, df_locais):
 		
 		if type == 'ONDAS':
 			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"https://hpgregorio.net/csv/ONDAS/ONDAS_{location}_{year}.csv"
 			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
 			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"https://hpgregorio.net/csv/VENTOS/VENTOS_{location}_{year}.csv"
 			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
 			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"https://hpgregorio.net/csv/SST/SST_{location}_{year}.csv"
 			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
+		
+		#headers = {'Accept': 'text/csv'}
+		#response = requests.get(filename_csv, headers=headers)
+		#csv_data = response.text
+		#df = pd.read_csv(io.StringIO(csv_data))
+		
+		
 		df = pd.read_csv(filename_csv)
+		
 		df['Datetime'] = pd.to_datetime(df['Datetime'])
 		
 		df['Datetime'] = df['Datetime'] + timedelta(hours=+gmt_offset)

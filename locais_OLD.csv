@@ -1,15 +1,10 @@
 "location","menu","title","onshore","offshore","side","side_onshore","side_offshore","time_zone","lat","lon"
-"ATINS","BRAZIL - Atins/MA","Atins/MA (Brazil)","N;NE","S;SW","SE;NW","E","W",-3,-2.52,-42.76
 "JERICOACOARA","BRAZIL - Jericoacoara/CE","Jericoacoara/CE (Brazil)","N","S","W;E","NE;NW","SE;SW",-3,-2.77,-40.52
-"SALVADOR","BRAZIL - Salvador/BA","Salvador/BA (Brazil)","SE;S","N;NW","SW;NE","E","W",-3,-13.05,-38.50
-"REGENCIA","BRAZIL - Regência/ES","Regência/ES (Brazil)","SE;S","N;NW","SW;NE","E","W",-3,-19.69,-39.80
-"SAQUAREMA","BRAZIL - Saquarema/RJ","Saquarema/RJ (Brazil)","S","N","E;W","SE;SW","NE;NW",-3,-22.94,-42.81
 "SAOSEBASTIAO","BRAZIL - Sao Sebastiao/SP","Sao Sebastiao/SP (Brazil)","SW;S","NE;N","W;E","SE","NW",-3,-24.4,-45.5
 "GAROPABA","BRAZIL - Garopaba/SC","Garopaba/SC (Brazil)","E;SW","W;NE","SE;NW","S","N",-3,-28.04,-48.56
 "CABOVERDE","CABO VERDE - Sal Island","Sal Island (Cabo Verde)","E","W","N;S","NE;SW","NW;SE",-1,16.575,-22.93
 "CRICANORTE","COSTA RICA - Guanacaste","Guanacaste (Costa Rica)","W;SW","E;NE","NW;SE","S","N",-6,10.1,-85.9
 "CRICASUL","COSTA RICA - Peninsula Osa","Peninsula Osa (Costa Rica)","E","W","N;S","NE;SE","NW;SW",-6,8.1,-83.2
-"CABARET","DOMINICAN REPUBLIC - Cabaret","Cabaret (Dominican Republic)","NW;W","SE;E","NE;SW","N","S",-4,19.725,-70.375
 "ELSALVADOR","EL SALVADOR - El Tunco","El Tunco (El Salvador)","S","N","W;E","SW;SE","NW;NE",-6,13,-89.4
 "BALI","INDONESIA - Bali","Bali (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-8.92,115.15
 "MENTAWAI","INDONESIA - Mentawai","Mentawai (Indonesia)","SE","NW","NE;SW","S;E","N;W",8,-1.96,99

@@ -14,6 +14,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.YETI,'/assets/typogra
 server = app.server
 
 df_locais = pd.read_csv('https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/locais.csv');
+#df_locais = pd.read_csv('locais.csv');
 fig_map = plot_map(df_locais)
 
 rose = plot_rose()
