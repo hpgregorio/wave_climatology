@@ -16,19 +16,16 @@ def load_data(location, years, type, df_locais):
 	for year in years:
 		
 		if type == 'ONDAS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-			#filename_csv = f"https://hpgregorio.net/csv/ONDAS/ONDAS_{location}_{year}.csv"
-			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-			#filename_csv = f"https://hpgregorio.net/csv/VENTOS/VENTOS_{location}_{year}.csv"
-			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
-			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
-			#filename_csv = f"https://hpgregorio.net/csv/SST/SST_{location}_{year}.csv"
-			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
 		
 		#headers = {'Accept': 'text/csv'}
@@ -245,14 +242,26 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	title_years = f"{selected_years[0]} to {selected_years[-1]}"
+	
+	if conditions[0]['direcao'] is not None:
+		title_trace = f"Waves with significant height equal to or greater <br>than {conditions[0]['altura']} m and period equal to or greater than {conditions[0]['periodo']} s,<br>coming from direction {conditions[0]['direcao']}"
+	else:
+		title_trace = f"Waves with significant height equal to or greater <br>than {conditions[0]['altura']} m and period equal to or greater than {conditions[0]['periodo']} s,<br>coming from any direction"
+		
+	fig = go.Figure()
+	
 	# Criando o gráfico de barras
 	trace = go.Bar(
 		x=month_names,
 		y=monthly_condition_percentage,
-		marker=dict(color='rgb(67, 78, 150)')
+		marker=dict(color='rgb(67, 78, 150)'),
+		name=title_trace,
+		showlegend = True
 	)
-
-	layout = go.Layout(
+	
+	fig.add_trace(trace)
+	
+	fig.update_layout(
 		title=f'Occurency according with the conditions<br>- {title_years}',
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		plot_bgcolor='rgba(255,255,255,0)',
@@ -260,10 +269,21 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 		yaxis_gridwidth=0.0001,
 		height=300,
 		width=350,
-		margin=dict(l=10, r=10, t=70, b=10),
+		margin=dict(l=10, r=10, t=70, b=0),
+		legend=dict(
+				x=-0.15,
+				y=-0.3,
+				orientation='h',
+				bgcolor='rgba(255, 255, 255, 0)',
+				traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
+				bordercolor='rgba(255, 255, 255, 0)',  # Cor da borda da legenda (transparente)
+				borderwidth=0,  # Largura da borda da legenda
+				xanchor='left',  # Ancoragem horizontal no centro
+				yanchor='top'  # Ancoragem vertical no topo
+			)
 	)
 
-	fig = go.Figure(data=[trace], layout=layout)
+	
 	return fig
 
 
@@ -309,7 +329,33 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		
 		# Calcule a média mensal ao longo dos anos
 		monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
-		monthly_prec_avg_hist = monthly_prec_avg*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
+		monthly_prec_avg_hist = monthly_prec_avg['prec']*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
+		
+		
+		
+		#precipitacao -- porcentagem de dias com chuva
+		
+		#calcula o quanto choveu em cada dia
+		daily_prec_sum = df_temp_hist.groupby(['Year', 'Month', df_temp_hist['Datetime'].dt.day])['prec'].sum().reset_index()
+		
+		#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
+		daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
+		
+		#calcula o total de dias por mês
+		total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
+		total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
+
+		#calcula a quantidade de dias que choveu em cada mes de cada ano		
+		monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
+
+		#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+		percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
+		percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
+
+		#faz a media mensal dos dias que choveu ao longo de todos os anos
+		avg_percentage_rainy_days_monthly_hist = percentage_rainy_days.groupby('Month')['PercentageRainyDays'].mean().reset_index()
+
+		monthly_prec_avg_hist = avg_percentage_rainy_days_monthly_hist['PercentageRainyDays']
 		
 		#####
 		#####
@@ -341,7 +387,44 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 	
 	# Calcule a média mensal ao longo dos anos
 	monthly_prec_avg = monthly_prec_sum.groupby('Month')['prec'].mean().reset_index()
-	monthly_prec_avg = monthly_prec_avg*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
+	monthly_prec_avg = monthly_prec_avg['prec']*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
+	
+	
+	
+	
+	
+	#precipitacao -- porcentagem de dias com chuva
+	
+	#calcula o quanto choveu em cada dia
+	daily_prec_sum = df.groupby(['Year', 'Month', df['Datetime'].dt.day])['prec'].sum().reset_index()
+	
+	#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
+	daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
+	
+	#calcula a quantidade de dias que choveu em cada mes de cada ano		
+	monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
+	
+	#calcula o total de dias por mês
+	total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
+	total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
+
+	#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+	percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
+	percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
+
+	#faz a media mensal dos dias que choveu ao longo de todos os anos
+	avg_percentage_rainy_days_monthly = percentage_rainy_days.groupby('Month')['PercentageRainyDays'].mean().reset_index()
+		
+	monthly_prec_avg = avg_percentage_rainy_days_monthly['PercentageRainyDays']	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	if selected_years[0] == selected_years[-1]:
@@ -357,7 +440,8 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		# Adicione barras para precipitação primeiro
 		trace_prec = go.Bar(
 			x=month_names,
-			y=monthly_prec_avg['prec'],
+			#y=monthly_prec_avg['prec'],
+			y=monthly_prec_avg,
 			name='Precipitation (%s)'%title_years,
 			marker=dict(color='rgba(64,183,173,1)')
 		)
@@ -365,7 +449,8 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		# Adicione barras para precipitação primeiro
 		trace_prec_hist = go.Bar(
 			x=month_names,
-			y=monthly_prec_avg_hist['prec'],
+			#y=monthly_prec_avg_hist['prec'],
+			y=monthly_prec_avg_hist,
 			name='Historic Precipitation (1993 to 2023)',
 			marker=dict(color='rgba(0, 0, 0, 0.2)')
 		)
@@ -477,7 +562,8 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		
 		trace_prec = go.Bar(
 			x=month_names,
-			y=monthly_prec_avg['prec'],
+			#y=monthly_prec_avg['prec'],
+			y=monthly_prec_avg,
 			name='Precipitation (%s)'%title_years,
 			marker=dict(color='rgba(0, 0, 0, 0.2)')
 		)
