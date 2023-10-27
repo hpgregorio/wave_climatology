@@ -16,16 +16,16 @@ def load_data(location, years, type, df_locais):
 	for year in years:
 		
 		if type == 'ONDAS':
-			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
-			filename_csv = f"csv/ONDAS_{location}_{year}.csv"
+			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
+			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
 		
 		elif type == 'VENTOS':
-			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
-			filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
+			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
+			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
 			
 		elif type == 'SST':
-			#filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
-			filename_csv = f"sst_csv/SST_{location}_{year}.csv"
+			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
+			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
 		
 		#headers = {'Accept': 'text/csv'}
