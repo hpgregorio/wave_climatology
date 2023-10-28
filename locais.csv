@@ -14,7 +14,7 @@
 "Asia","BALI","INDONESIA - Bali","Bali (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-8.92,115.15
 "Asia","MENTAWAI","INDONESIA - Mentawai","Mentawai (Indonesia)","SE","NW","NE;SW","S;E","N;W",8,-1.96,99
 "Asia","SUMBAWA","INDONESIA - Sumbawa","Sumbawa (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-9.12,116.8
-"North America","SALINACRUZ","MEXICO - Salina Cruz","Salina Cruz (Mexico)","S;SE","N;NW","E;W","SW","NE",-6,16.11,-95.17
+"North America","SALINACRUZ","MEXICO - Salina Cruz","Salina Cruz (Mexico)","S;SE","N;NW","NE;SW","E","W",-6,16.11,-95.17
 "Africa","MARROCOSMIRLEFT","MOROCCO - Mirleft","Mirleft (Morocco)","NW","SE","NE;SW","N;W","S;E",1,29.5,-10.2
 "Africa","MARROCOSKAOKI","MOROCCO - Sidi Kaoki","Sidi Kaoki (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.55,-9.9
 "Africa","MARROCOSTAGHAZOUT","MOROCCO - Taghazout","Taghazout (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.4,-9.8
@@ -23,7 +23,16 @@
 "Africa","JEFREYS","SOUTH AFRICA - Jefrey's Bay","Jefrey's Bay (South Africa)","E;SE","W;NW","NE;SW","S","N",2,-34.08,25
 "Asia","HUAHIN","THAILAND - Hua Hin","Hua Hin (Thailand)","W","E","N;S","SW;NW","SE;NE",7,12.55,100.05
 "North America","ELMERS","USA - Elmers Island/LA","Elmers Island/LA (USA)","SE","NW","NE;SW","E;S","N;W",-5,29.17,-90.5
-
+"South America","MATANZAS","CHILE - Matanzas","Matanzas (Chile)","W;NW","E;SE","N;S","SW","NE",-3,-33.95831,-71.89574
+"Central America/Caribe","ELCOLORADO","NICARAGUA - El Colorado","El Colorado (Nicaragua)","S;SW","N;NE","SE;NW","W","E",-6,11.39183,-86.06528
+"North America","OAHU","HAWAII - North Shore Oahu","North Shore Oahu (Hawaii)","NW;N","SE;S","NE;SW","W","E",-10,21.71538,-158.07067
+"Oceania","RAGLAN","NEW ZELAND - Raglan","Raglan (New Zeland)","W;NW","E;SE","N;S","SW","NE",12,-37.80152,174.73101
+"Oceania","GOLDCOAST","AUSTRALIA - Gold Coast","Gold Coast (Australia)","W","E","N;S","SW;NW","SE;NE",10,-28.06908,153.64981
+"Oceania","PERTH","AUSTRALIA - Perth","Perth (Australia)","W;NW","E;SE","N;S","SW","NE",8,-33.92826,114.80442
+"Europe","HOSSEGOR","FRANCE - Hossegor","Hossegor (France)","W;NW","E;SE","N;S","SW","NE",2,43.52487,-1.56672
+"Europe","ERICEIRA","PORTUGAL - Ericeira","Ericeira (Portugal)","W;NW","E;SE","N;S","SW","NE",1,38.97205,-9.54866
+"Central America/Caribe","LOSROQUES","VENEZUELA - Los Roques","Los Roques (Venezuela)","N","S","W;E","NE;NW","SE;SW",-4,11.96212,-66.6719
+"Africa","DAKHLA","MOROCCO - Dakhla","Dakhla (Morocco)","W;SW","E;NE","N;S","NW","SE",1,23.65026",-16.01698
 
 
 

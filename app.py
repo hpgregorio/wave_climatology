@@ -229,6 +229,26 @@ app.layout = dbc.Accordion([
 						),
 						
 						html.Br(),
+						html.Label("Select the units for precipitation:"),
+						html.Br(),
+						
+						html.Div(style={'max-width': '350px'},
+							children=[
+								dcc.RadioItems(
+									id='prec-kind',
+									options=[
+										{'label': '  Average mm/month or mm/h', 'value': 'mm'},
+										{'label': '  Percentage of days with more than 1 mm/day of precipitation or percentage of days with more than 0.1 mm/hour of precipitation', 'value': 'perc'},
+									],
+									value='perc',
+									#style={'max-width': '350px', 'white-space': 'pre'}
+								),
+							],
+						),
+						
+						
+						
+						html.Br(),
 						dcc.Graph(id='other_anual_times', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
 						
@@ -392,7 +412,7 @@ def update_menus(region):
 	[Output('waves-content', 'style'),
 	 Output('wind-content', 'style'),
 	 Output('others-content', 'style')],
-	[Input('tabs', 'active_tab')]
+	 [Input('tabs', 'active_tab')],
 )
 def show_tabs(active_tab):
 	if active_tab == "waves": return {'display': 'block'}, {'display': 'none'}, {'display': 'none'}
@@ -410,7 +430,8 @@ def show_tabs(active_tab):
 @app.callback(
 	[Output('monthly-stats-plot-alt', 'figure'),
 	 Output('monthly-stats-plot-dir', 'figure'),
-	 Output('monthly-stats-plot-per', 'figure')],
+	 Output('monthly-stats-plot-per', 'figure'),
+	 Output('update-button-cond', 'n_clicks')],
 	[Input('location-dropdown', 'value'),
 	 Input('start-year', 'value'),
 	 Input('end-year', 'value'),
@@ -469,10 +490,10 @@ def update_wave_plots_month(selected_location, start_year, end_year, active_tab)
 
 		month_per = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 		
-		return [month_alt, month_dir, month_per]
+		return [month_alt, month_dir, month_per, 2]
 	
 	else:
-		return [no_update]*3
+		return [no_update]*3 + [1]
 
 
 
@@ -550,7 +571,7 @@ def update_wave_plots_year(selected_location, start_year, end_year, selected_mon
 		
 # Callbacks para atualizar os gráficos de ondas - condições especiais)
 @app.callback([Output('custom-conditions-plot', 'figure'),
-	 Output('update-button-cond', 'n_clicks')],
+	 Output('update-button-cond', 'n_clicks',allow_duplicate = True)],
 	[Input('update-button-cond', 'n_clicks'),
 	 Input('location-dropdown', 'value'),
 	 Input('start-year', 'value'),
@@ -564,7 +585,8 @@ def update_wave_plots_year(selected_location, start_year, end_year, selected_mon
 	 Input('direcao1', 'value'),
 	 Input('direcao2', 'value'),
 	 Input('direcao3', 'value'),
-	 Input('tabs', 'active_tab')]
+	 Input('tabs', 'active_tab')],
+	 prevent_initial_call=True,
 )
 def update_wave_plots_conditions(n_clicks, selected_location, start_year, end_year, altura1, altura2, altura3, periodo1, periodo2, periodo3, direcao1, direcao2, direcao3, active_tab):	 
 	
@@ -709,9 +731,10 @@ def update_wind_plots(selected_location, start_year, end_year, selected_month_wi
 	 Input('end-year', 'value'),
 	 Input('month-dropdown_others', 'value'),
 	 Input('horarios-checklist_sst', 'value'),
+	 Input('prec-kind', 'value'),
 	 Input('tabs', 'active_tab')]
 )
-def update_other_plots(selected_location, start_year, end_year, selected_month_others, selected_hours_others, active_tab):
+def update_other_plots(selected_location, start_year, end_year, selected_month_others, selected_hours_others, prec_kind, active_tab):
 
 	anos = list(range(start_year, end_year + 1))
 	
@@ -720,11 +743,11 @@ def update_other_plots(selected_location, start_year, end_year, selected_month_o
 		df_wind = load_data(selected_location, anos, 'VENTOS', df_locais)
 		df_sst = load_data(selected_location, anos, 'SST', df_locais)
 				
-		fig_other = plot_others(df_locais, df_wind, df_sst, anos, selected_location, selected_hours_others)
-		fig_other_prec = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'prec', 'Precipitation', selected_location)
+		fig_other = plot_others(df_locais, df_wind, df_sst, anos, selected_location, selected_hours_others, prec_kind)
+		fig_other_prec = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'prec', 'Precipitation', selected_location, None, prec_kind)
 		fig_other_temp = plot_annual_stats_others(df_locais, df_wind, anos, selected_month_others, 'temp', 'Air Temp', selected_location, selected_hours_others)
 		fig_other_sst = plot_annual_stats_others(df_locais, df_sst, anos, selected_month_others, 'sst', 'Sea Temp', selected_location)
-		fig_other_hourly = plot_others_hour(df_locais, df_wind, anos, selected_location, selected_month_others)
+		fig_other_hourly = plot_others_hour(df_locais, df_wind, anos, selected_location, selected_month_others, prec_kind)
 			
 		return [fig_other, fig_other_hourly, fig_other_prec, fig_other_temp, fig_other_sst]
 

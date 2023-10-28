@@ -266,13 +266,13 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
-		yaxis_gridwidth=0.0001,
-		height=300,
+		yaxis_gridwidth=0.5,
+		height=350,
 		width=350,
 		margin=dict(l=10, r=10, t=70, b=0),
 		legend=dict(
 				x=-0.15,
-				y=-0.3,
+				y=-0.2,
 				orientation='h',
 				bgcolor='rgba(255, 255, 255, 0)',
 				traceorder='normal',  # Ordem padrão de exibição dos itens da legenda
@@ -289,7 +289,7 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 
 
 
-def plot_others(df_locais, df, df_sst, selected_years, selected_location, selected_hours=None):
+def plot_others(df_locais, df, df_sst, selected_years, selected_location, selected_hours, prec_kind):
 
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
 		
@@ -332,30 +332,30 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		monthly_prec_avg_hist = monthly_prec_avg['prec']*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
 		
 		
-		
-		#precipitacao -- porcentagem de dias com chuva
-		
-		#calcula o quanto choveu em cada dia
-		daily_prec_sum = df_temp_hist.groupby(['Year', 'Month', df_temp_hist['Datetime'].dt.day])['prec'].sum().reset_index()
-		
-		#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
-		daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
-		
-		#calcula o total de dias por mês
-		total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
-		total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
+		if prec_kind == 'perc':
+			#precipitacao -- porcentagem de dias com chuva
+			
+			#calcula o quanto choveu em cada dia
+			daily_prec_sum = df_temp_hist.groupby(['Year', 'Month', df_temp_hist['Datetime'].dt.day])['prec'].sum().reset_index()
+			
+			#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
+			daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
+			
+			#calcula o total de dias por mês
+			total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
+			total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
 
-		#calcula a quantidade de dias que choveu em cada mes de cada ano		
-		monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
+			#calcula a quantidade de dias que choveu em cada mes de cada ano		
+			monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
 
-		#calcula a porcentagem de dias que choveu em cada dia e em cada ano
-		percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
-		percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
+			#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+			percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
+			percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
 
-		#faz a media mensal dos dias que choveu ao longo de todos os anos
-		avg_percentage_rainy_days_monthly_hist = percentage_rainy_days.groupby('Month')['PercentageRainyDays'].mean().reset_index()
+			#faz a media mensal dos dias que choveu ao longo de todos os anos
+			avg_percentage_rainy_days_monthly_hist = percentage_rainy_days.groupby('Month')['PercentageRainyDays'].mean().reset_index()
 
-		monthly_prec_avg_hist = avg_percentage_rainy_days_monthly_hist['PercentageRainyDays']
+			monthly_prec_avg_hist = avg_percentage_rainy_days_monthly_hist['PercentageRainyDays']
 		
 		#####
 		#####
@@ -390,38 +390,31 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 	monthly_prec_avg = monthly_prec_avg['prec']*3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
 	
 	
-	
-	
-	
-	#precipitacao -- porcentagem de dias com chuva
-	
-	#calcula o quanto choveu em cada dia
-	daily_prec_sum = df.groupby(['Year', 'Month', df['Datetime'].dt.day])['prec'].sum().reset_index()
-	
-	#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
-	daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
-	
-	#calcula a quantidade de dias que choveu em cada mes de cada ano		
-	monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
-	
-	#calcula o total de dias por mês
-	total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
-	total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
-
-	#calcula a porcentagem de dias que choveu em cada dia e em cada ano
-	percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
-	percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
-
-	#faz a media mensal dos dias que choveu ao longo de todos os anos
-	avg_percentage_rainy_days_monthly = percentage_rainy_days.groupby('Month')['PercentageRainyDays'].mean().reset_index()
+	if prec_kind == 'perc':	
+		#precipitacao -- porcentagem de dias com chuva
 		
-	monthly_prec_avg = avg_percentage_rainy_days_monthly['PercentageRainyDays']	
-	
-	
-	
-	
-	
-	
+		#calcula o quanto choveu em cada dia
+		daily_prec_sum = df.groupby(['Year', 'Month', df['Datetime'].dt.day])['prec'].sum().reset_index()
+		
+		#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
+		daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
+		
+		#calcula a quantidade de dias que choveu em cada mes de cada ano		
+		monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
+		
+		#calcula o total de dias por mês
+		total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
+		total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
+
+		#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+		percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
+		percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
+
+		#faz a media mensal dos dias que choveu ao longo de todos os anos
+		avg_percentage_rainy_days_monthly = percentage_rainy_days.groupby('Month')['PercentageRainyDays'].mean().reset_index()
+			
+		monthly_prec_avg = avg_percentage_rainy_days_monthly['PercentageRainyDays']	
+		
 	
 	
 	
@@ -520,9 +513,15 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			
 		)
 
+		if prec_kind == 'perc':
+			tit_y = f'Occurancy (%) of days with<br>precipitation over 1 mm/day'
+		else:
+			tit_y = 'Precipitation (mm/h)'
+		
+
 		fig.update_layout(
 			title=tit,
-			yaxis=dict(title='Precipitation (mm/month)'),# range=[0, 200]),
+			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(title='Air Temp (°C)'),
 			yaxis3=dict(title='Sea Temp (°C)'),
 			plot_bgcolor='rgba(255,255,255,0)',
@@ -585,9 +584,14 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			line=dict(color='rgb(220, 20, 60)'),
 			yaxis='y2'
 		)
-
+		
+		if prec_kind == 'perc':
+			tit_y = f'Occurancy (%) of days with<br>precipitation over 1 mm/day'
+		else:
+			tit_y = 'Precipitation (mm/h)'
+		
 		fig.update_layout(title=tit,
-			yaxis=dict(title='Precipitation (mm/month)'),# range=[0, 200]),
+			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(
 				title='Temp (°C)',
 				overlaying='y',
@@ -623,7 +627,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 	
 
 
-def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome_parametro, selected_location, selected_hours=None):
+def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome_parametro, selected_location, selected_hours=None, prec_kind=None):
 
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
 		
@@ -645,7 +649,30 @@ def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome
 	
 	if parametro == 'prec': 
 		monthly_prec_sum = month_data.groupby(['Year'])['prec'].sum().reset_index()
-		montly_average_year = monthly_prec_sum *3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
+		montly_average_year = monthly_prec_sum['prec'] *3000 #transformar para mm/mês (dado original está em m e em horas - dados a cada 3h (tranforma em 24 multiplicando por 3)
+
+		if prec_kind == 'perc':
+			#calcula o quanto choveu em cada dia
+			daily_prec_sum = month_data.groupby(['Year', 'Month', month_data['Datetime'].dt.day])['prec'].sum().reset_index()
+			
+			#agora coloca uma flag falando que se choveu mais que 0.5 mm, esse é considerado um rainy day
+			daily_prec_sum['RainyDay'] = (daily_prec_sum['prec'] > 1/1000).astype(int)
+			
+			#calcula a quantidade de dias que choveu em cada mes de cada ano		
+			monthly_yearly_rainy_days = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].sum().reset_index()
+			
+			#calcula o total de dias por mês
+			total_days_per_month = daily_prec_sum.groupby(['Year', 'Month'])['RainyDay'].count().reset_index()
+			total_days_per_month = total_days_per_month.rename(columns={'RainyDay': 'TotalDays'})
+
+			#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+			percentage_rainy_days = pd.merge(monthly_yearly_rainy_days, total_days_per_month, on=['Year', 'Month'], how='left')
+			percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyDay'] / percentage_rainy_days['TotalDays']) * 100
+
+			monthly_prec_avg = percentage_rainy_days['PercentageRainyDays']	
+		
+			montly_average_year = monthly_prec_avg
+
 	
 	else:
 		montly_average_year = month_data.groupby(['Year', month_data['Datetime'].dt.month])[parametro].mean()
@@ -654,10 +681,13 @@ def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome
 	fig = go.Figure()
 	
 	if parametro == 'prec':
-		titulo = 'Precipitation (mm/month)';
+		if prec_kind == 'perc':
+			titulo = f'Occurancy (%) of days with<br>precipitation over 1 mm/day'
+		else:
+			titulo = 'Precipitation (mm/month)'
 		trace = go.Bar(
 			x=years,
-			y=montly_average_year[parametro],
+			y=montly_average_year,
 			name=nome_parametro,
 			marker=dict(color='rgb(200, 200, 200)')
 		)
@@ -827,6 +857,9 @@ def plot_map(df):
 
 
 
+
+
+
 def plot_wind_hours(df_locais, df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, mes=None):
 
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
@@ -912,7 +945,7 @@ def plot_wind_hours(df_locais, df, selected_years, bins, labels, parametro, nome
 	return fig
 	
 	
-def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None):
+def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec_kind):
 
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
 	
@@ -921,22 +954,18 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None)
 	else:
 		title_years = f"{selected_years[0]} to {selected_years[-1]}"
 	
-	if mes is not None:
-		df = df[df['Datetime'].dt.month == mes]
-		month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-		title_month = f"{month_names[mes-1]}"
-		tit = f'{tit} - {title_month}'
-	else:
-		tit = f'{tit} - {title_years}'
-	
+	df = df[df['Datetime'].dt.month == mes]
+	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+	title_month = f"{month_names[mes-1]}"
+	tit = f'{tit} - {title_month}'
+
 	if selected_years != list(range(1993, 2023 + 1)):
 		#####
 		#historic data
 		#####
 		df_temp_hist = load_data(selected_location, list(range(1993, 2023 + 1)), 'VENTOS', df_locais)
 		
-		if mes is not None:
-			df_temp_hist = df_temp_hist[df_temp_hist['Datetime'].dt.month == mes]
+		df_temp_hist = df_temp_hist[df_temp_hist['Datetime'].dt.month == mes]
 		
 		df_temp_hist['Hour'] = df_temp_hist['Datetime'].dt.hour
 		
@@ -945,6 +974,21 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None)
 
 		hourly_prec_avg_hist = df_temp_hist.groupby('Hour')['prec'].mean()*1000
 		hourly_prec_std_hist = df_temp_hist.groupby('Hour')['prec'].std()*1000
+		
+		if prec_kind == 'perc':
+			#porcentagem de dias com mais de 0.1 mm/h
+			df_temp_hist['RainyHour'] = (df_temp_hist['prec'] > .1/1000).astype(int)
+			monthly_hourly_rainy = df_temp_hist.groupby(['Hour'])['RainyHour'].sum().reset_index()
+			
+			total_days_per_month = df_temp_hist.groupby(['Hour'])['RainyHour'].count().reset_index()
+			total_days_per_month = total_days_per_month.rename(columns={'RainyHour': 'TotalDays'})
+			
+			#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+			percentage_rainy_days = pd.merge(monthly_hourly_rainy, total_days_per_month, on=['Hour'], how='left')
+			
+			percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyHour'] / percentage_rainy_days['TotalDays']) * 100
+
+			hourly_prec_avg_hist = percentage_rainy_days['PercentageRainyDays']	
 
 		#####
 		#####
@@ -953,9 +997,6 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None)
 		
 	hours_loc = sorted(df['Datetime'].dt.hour.unique())
 	
-	if mes is not None:
-		df = df[df['Datetime'].dt.month == mes]
-		
 	df['Hour'] = df['Datetime'].dt.hour
 		
 	hourly_temp_avg = df.groupby('Hour')['temp'].mean()
@@ -963,6 +1004,29 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None)
 
 	hourly_prec_avg = df.groupby('Hour')['prec'].mean()*1000
 	hourly_prec_std = df.groupby('Hour')['prec'].std()*1000
+	
+	
+	if prec_kind == 'perc':
+		#porcentagem de dias com mais de 0.1 mm/h
+		df['RainyHour'] = (df['prec'] > .1/1000).astype(int)
+		monthly_hourly_rainy = df.groupby(['Hour'])['RainyHour'].sum().reset_index()
+		
+		total_days_per_month = df.groupby(['Hour'])['RainyHour'].count().reset_index()
+		total_days_per_month = total_days_per_month.rename(columns={'RainyHour': 'TotalDays'})
+		
+		#calcula a porcentagem de dias que choveu em cada dia e em cada ano
+		percentage_rainy_days = pd.merge(monthly_hourly_rainy, total_days_per_month, on=['Hour'], how='left')
+		
+		percentage_rainy_days['PercentageRainyDays'] = (percentage_rainy_days['RainyHour'] / percentage_rainy_days['TotalDays']) * 100
+
+		hourly_prec_avg = percentage_rainy_days['PercentageRainyDays']	
+	
+		
+	
+	
+	
+	
+	
 	
 	
 	if selected_years[0] == selected_years[-1]:
@@ -1024,10 +1088,14 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None)
 			
 		)
 
+		if prec_kind == 'perc':
+			tit_y = f'Occurancy (%) of days with<br>precipitation over 0.1 mm/h'
+		else:
+			tit_y = 'Precipitation (mm/h)'
 		
 		fig.update_layout(
 			title=tit,
-			yaxis=dict(title='Precipitation (mm/h)'),# range=[0, 200]),
+			yaxis=dict(title=tit),# range=[0, 200]),
 			yaxis2=dict(title='Air Temp (°C)'),
 			plot_bgcolor='rgba(255,255,255,0)',
 			yaxis_gridcolor='lightgray',
@@ -1079,8 +1147,13 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes=None)
 			yaxis='y2'
 		)
 
+		if prec_kind == 'perc':
+			tit_y = f'Occurancy (%) of days with<br>precipitation over 0.1 mm/h'
+		else:
+			tit_y = 'Precipitation (mm/h)'
+
 		fig.update_layout(title=tit,
-			yaxis=dict(title='Precipitation (mm/h)'),# range=[0, 200]),
+			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(
 				title='Temp (°C)',
 				overlaying='y',
