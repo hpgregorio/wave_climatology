@@ -15,8 +15,8 @@ server = app.server
 
 df_locais = pd.read_csv('https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/locais.csv');
 #df_locais = pd.read_csv('locais.csv');
-fig_map = plot_map(df_locais)
 
+fig_map = plot_map(df_locais)
 rose = plot_rose()
 
 app.layout = dbc.Accordion([
@@ -28,12 +28,8 @@ app.layout = dbc.Accordion([
 			color='rgba(64,183,173,1)',
 			style={'backgroundColor': None},
 			children=[
-				
-
 				dbc.Container([
-				
 					html.Label("Region:"),
-					
 					html.Div([
 						dcc.Dropdown(
 							id='region-dropdown',
@@ -41,8 +37,6 @@ app.layout = dbc.Accordion([
 							value='South America'
 						),
 					]),
-
-
 					html.Label("Location:"),
 					
 					html.Div([
@@ -54,13 +48,7 @@ app.layout = dbc.Accordion([
 							value=['SAOSEBASTIAO']
 						),
 					]),
-					
-				
-					
-					
-
 					html.Br(),
-
 					html.Label("Years selection:"),
 					html.Div([
 						dcc.Dropdown(
@@ -74,35 +62,20 @@ app.layout = dbc.Accordion([
 							options=[{'label': str(i), 'value': i} for i in range(1993, 2024)],
 							value=2023,
 						),
-					
-						#html.Div(children=' ', style={'margin': '0 10px'}),
-						
-						
-
-						
 					], style={'display': 'flex', 'alignItems': 'center'}),
-			
 					html.Br(),
-					
 					dbc.Tabs([
 						dbc.Tab(label="Waves", tab_id="waves"),
 						dbc.Tab(label="Wind", tab_id="wind"),
 						dbc.Tab(label="Others", tab_id="other"),
-					],
-					id="tabs",
-					active_tab="waves",
-					),
-
+					], id="tabs",active_tab="waves"),
 					html.Div([
 						html.Br(),
 						dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
-						
 						dcc.Graph(id='monthly-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wave1', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
-						
 						dcc.Graph(id='monthly-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
-						
 						html.Div([
 							html.Label("Cond. 1:		"),
 							dcc.Input(id='altura1', type='number', placeholder='Height', style={'maxWidth': '80px'}, value = 1),
@@ -121,19 +94,14 @@ app.layout = dbc.Accordion([
 							dcc.Input(id='periodo3', type='number', placeholder='Period', style={'maxWidth': '80px'}),
 							dcc.Input(id='direcao3', type='text', placeholder='Dir (none = ALL)', style={'maxWidth': '120px'}),
 						], style={'width': '100%', 'white-space': 'pre'}),
-						
 						html.Label("Filling more than one condition will add the occurrences"),
 						html.Br(),
-						
 						html.Div([
 							dbc.Button("Update Conditions Graph", id="update-button-cond", n_clicks=0, color='info', outline=True),
 							], 
-						#id="floating-button-container", style={"position": "fixed", "top": "175px", "right": "50px", "zIndex": 1000}),
 						id="button-cond"),
-											
 						dcc.Graph(id='custom-conditions-plot', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
-						
 						html.Div([
 							html.Label("Select the month:"),
 							dcc.Dropdown(
@@ -145,28 +113,17 @@ app.layout = dbc.Accordion([
 								style={'width': '100%', 'display': 'inline-block'}
 							),
 						]),
-						
 						dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wave2', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='annual-stats-plot-per', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 					], id="waves-content", style={'display': 'block'}),
-					
-					
-					
-					
 					#WIND				
-					
-					
-					
-					
 					html.Div([
-					
 						html.Br(),
 						html.Label("Select the hours of the day to analyze the wind"),
 						html.Br(),
 						html.Label("(LOCAL TIME - more than one = average):"),
-
 						dcc.Dropdown(
 							id='horarios-checklist_wind',
 							options=[
@@ -176,12 +133,10 @@ app.layout = dbc.Accordion([
 							multi=True,
 							style={'white-space': 'pre'}
 						),	
-						
 						dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wind1', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='monthly-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
-						
 						html.Div([
 							html.Label("Select the month:"),
 							dcc.Dropdown(
@@ -193,31 +148,21 @@ app.layout = dbc.Accordion([
 								style={'width': '100%', 'display': 'inline-block'}
 							),
 						]),
-						
 						dcc.Graph(id='hour-month-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='hour-month-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wind2', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='hour-month-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
-
 						dcc.Graph(id='annual-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='annual-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wind3', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='annual-stats-plot-dir_wind_t', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
-
-						
 					], id="wind-content", style={'display': 'none'}),	
-					
-					
-					
 					#OTHERS
-					
-					
 					html.Div([
 						html.Br(),
 						html.Label("Select the hours of the day to analyze the air"),
 						html.Br(),
 						html.Label("temperature (LOCAL TIME - more than one = average):"),
-
 						dcc.Dropdown(
 							id='horarios-checklist_sst',
 							options=[
@@ -227,11 +172,9 @@ app.layout = dbc.Accordion([
 							multi=True,
 							style={'white-space': 'pre'}
 						),
-						
 						html.Br(),
 						html.Label("Select the units for precipitation:"),
 						html.Br(),
-						
 						html.Div(style={'max-width': '350px'},
 							children=[
 								dcc.RadioItems(
@@ -245,13 +188,9 @@ app.layout = dbc.Accordion([
 								),
 							],
 						),
-						
-						
-						
 						html.Br(),
 						dcc.Graph(id='other_anual_times', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
-						
 						html.Div([
 							html.Label("Select the month:"),
 							dcc.Dropdown(
@@ -263,10 +202,8 @@ app.layout = dbc.Accordion([
 								style={'width': '100%', 'display': 'inline-block'}
 							),
 						]),
-						
 						html.Br(),
 						dcc.Graph(id='other_times', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
-						
 						html.Br(),
 						dcc.Graph(id='annual-stats-plot-prec', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
@@ -284,10 +221,9 @@ app.layout = dbc.Accordion([
 	dbc.AccordionItem(
 		html.Div(style={'max-width': '350px'},
 			children=[
-			
 				html.Div([
 					html.Img(src='/assets/logo.png', style={'text-align': 'center'}),
-					html.Label("Decide when it is time to (take your) board!",style={'font-style': 'italic','color':'rgba(64,183,173,1)',}),
+					html.Label("Decide when it's time to (take your) board!",style={'font-style': 'italic','color':'rgba(64,183,173,1)',}),
 				], style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}),
 				html.Br(),
 				html.Div([
@@ -348,19 +284,6 @@ app.layout = dbc.Accordion([
 	),
 ],flush=True,start_collapsed=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Callback para atualizar dinamicamente os rótulos dos horários para hora local
 @app.callback(
 	[Output('horarios-checklist_wind', 'options'),
@@ -377,15 +300,7 @@ def update_horarios_labels(selected_location):
 	horarios_atualizados = [{'label': f' {hora[0]:02d}:00   ', 'value': hora[0]} for hora in horarios_convertidos]
 	
 	closest = min(horarios_convertidos, key=lambda x: abs(x[0] - 9))
-
 	return  horarios_atualizados, [closest[0]], horarios_atualizados, [closest[0]]
-
-
-
-
-
-
-
 
 # Callback para atualizar o menu de locais de acordo com a região escolhida	
 @app.callback(
@@ -400,12 +315,6 @@ def update_menus(region):
 	
 	options = [{'label': menu, 'value': location} for menu, location in zip(sites_menu, sites_location)]
 	return  options, sites_location[0]
-	
-
-
-
-
-
 
 # Callbacks para atualizar a qual é a guia ativa
 @app.callback(
@@ -419,12 +328,6 @@ def show_tabs(active_tab):
 	elif active_tab == "wind": return {'display': 'none'}, {'display': 'block'}, {'display': 'none'}
 	elif active_tab == "other": return {'display': 'none'}, {'display': 'none'}, {'display': 'block'}
 	else: return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
-
-
-
-
-
-
 
 # Callbacks para atualizar os gráficos de ondas (exceto de condições especiais) ## MENSAL
 @app.callback(
@@ -447,22 +350,18 @@ def update_wave_plots_month(selected_location, start_year, end_year, active_tab)
 		labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
 		parametro = 'VHM0'
 		nome_parametro = 'Significant Wave Height (m)'
-
 		bin_color_map = {
 		'< 1,0': 'rgb(207,159,0)',
 		'1,0-1,5': 'rgb(190,96,0)',
 		'1,5-2,0': 'rgb(165,30,0)',
 		'2,0-2,5': 'rgb(129,0,111)',
 		'> 2,5': 'rgb(44,0,98)'}
-
 		month_alt = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 		
-
 		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 		labels = bins
 		parametro = 'CardinalDirection'
 		nome_parametro = 'Wave direction'
-
 		bin_color_map = {
 		'N': 'rgb(24,0,33)',
 		'NE': 'rgb(60,15,111)',
@@ -472,14 +371,12 @@ def update_wave_plots_month(selected_location, start_year, end_year, active_tab)
 		'SW': 'rgb(171,135,111)',
 		'W': 'rgb(148,64,54)',
 		'NW': 'rgb(109,15,51)'}
-
 		month_dir = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 		
 		bins = [0, 8, 10, 12, 14, 16, float('inf')]
 		labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
 		parametro = 'VTPK'
 		nome_parametro = 'Peak wave period (s)'
-
 		bin_color_map = {
 		'< 8': 'rgb(255,255,229)',
 		'8-10': 'rgb(243,250,182)',
@@ -487,16 +384,12 @@ def update_wave_plots_month(selected_location, start_year, end_year, active_tab)
 		'12-14': 'rgb(159,215,136)',
 		'14-16': 'rgb(66,171,93)',
 		'> 16': 'rgb(0,69,41)'}
-
 		month_per = plot_monthly_stats(df_locais, df, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 		
 		return [month_alt, month_dir, month_per, 2]
 	
 	else:
 		return [no_update]*3 + [1]
-
-
-
 
 # Callbacks para atualizar os gráficos de ondas (exceto de condições especiais) ##ANUAL
 @app.callback(
@@ -519,21 +412,18 @@ def update_wave_plots_year(selected_location, start_year, end_year, selected_mon
 		labels = ['< 1,0', '1,0-1,5', '1,5-2,0', '2,0-2,5', '> 2,5']
 		parametro = 'VHM0'
 		nome_parametro = 'Significant Wave Height (m)'
-
 		bin_color_map = {
 		'< 1,0': 'rgb(207,159,0)',
 		'1,0-1,5': 'rgb(190,96,0)',
 		'1,5-2,0': 'rgb(165,30,0)',
 		'2,0-2,5': 'rgb(129,0,111)',
 		'> 2,5': 'rgb(44,0,98)'}
-
 		year_alt = plot_annual_stats(df_locais, df, anos, selected_month, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 
 		bins = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 		labels = bins
 		parametro = 'CardinalDirection'
 		nome_parametro = 'Wave direction'
-
 		bin_color_map = {
 		'N': 'rgb(24,0,33)',
 		'NE': 'rgb(60,15,111)',
@@ -543,14 +433,12 @@ def update_wave_plots_year(selected_location, start_year, end_year, selected_mon
 		'SW': 'rgb(171,135,111)',
 		'W': 'rgb(148,64,54)',
 		'NW': 'rgb(109,15,51)'}
-
 		year_dir = plot_annual_stats(df_locais, df, anos, selected_month, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
 
 		bins = [0, 8, 10, 12, 14, 16, float('inf')]
 		labels = ['< 8', '8-10', '10-12', '12-14', '14-16', '> 16']
 		parametro = 'VTPK'
 		nome_parametro = 'Peak wave period (s)'
-
 		bin_color_map = {
 		'< 8': 'rgb(255,255,229)',
 		'8-10': 'rgb(243,250,182)',
@@ -558,16 +446,10 @@ def update_wave_plots_year(selected_location, start_year, end_year, selected_mon
 		'12-14': 'rgb(159,215,136)',
 		'14-16': 'rgb(66,171,93)',
 		'> 16': 'rgb(0,69,41)'}
-
 		year_per = plot_annual_stats(df_locais, df, anos, selected_month, bins, labels, parametro, nome_parametro, bin_color_map, selected_location)
-
-	
-
 		return [year_alt, year_dir, year_per]
-	
 	else:
 		return [no_update]*3
-
 		
 # Callbacks para atualizar os gráficos de ondas - condições especiais)
 @app.callback([Output('custom-conditions-plot', 'figure'),
@@ -589,7 +471,6 @@ def update_wave_plots_year(selected_location, start_year, end_year, selected_mon
 	 prevent_initial_call=True,
 )
 def update_wave_plots_conditions(n_clicks, selected_location, start_year, end_year, altura1, altura2, altura3, periodo1, periodo2, periodo3, direcao1, direcao2, direcao3, active_tab):	 
-	
 	anos = list(range(start_year, end_year + 1))
 	
 	if n_clicks == 0: #update the first time when n_clicks=0. After always gonna be 1 when not clicked and 2 when clicked (after updating return to 1)
@@ -605,12 +486,9 @@ def update_wave_plots_conditions(n_clicks, selected_location, start_year, end_ye
 			return fig_custom_conditions, 1
 		else:
 			return no_update, 0
-	
 	if n_clicks == 1:
 		raise PreventUpdate
-		
 	else:
-		
 		if active_tab == "waves":
 			df = load_data(selected_location, anos, 'ONDAS', df_locais)
 		
@@ -621,8 +499,6 @@ def update_wave_plots_conditions(n_clicks, selected_location, start_year, end_ye
 			fig_custom_conditions = plot_custom_conditions_frequency(df, conditions, anos)
 			
 			return fig_custom_conditions, 1
-		
-
 
 # Callbacks para atualizar os gráficos da guia de vento
 @app.callback(
@@ -643,11 +519,9 @@ def update_wave_plots_conditions(n_clicks, selected_location, start_year, end_ye
 	 Input('tabs', 'active_tab')]
 )
 def update_wind_plots(selected_location, start_year, end_year, selected_month_wind, selected_hours, active_tab):
-
 	anos = list(range(start_year, end_year + 1))
 
 	if active_tab == "wind":
-		
 		df_wind = load_data(selected_location, anos, 'VENTOS', df_locais)
 			
 		bins = [0, 6, 12, 15, 18, 21, 25, 30, float('inf')]
@@ -713,11 +587,8 @@ def update_wind_plots(selected_location, start_year, end_year, selected_month_wi
 		hour_dir_t = plot_wind_hours(df_locais, df_wind, anos, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_month_wind);
 			
 		return [month_int, year_int, hour_int, month_dir, year_dir, hour_dir, month_dir_t, year_dir_t, hour_dir_t]
-	
 	else:
 		return [no_update]*9
-
-
 
 # Callbacks para atualizar os gráficos da guia outros
 @app.callback(
@@ -735,11 +606,9 @@ def update_wind_plots(selected_location, start_year, end_year, selected_month_wi
 	 Input('tabs', 'active_tab')]
 )
 def update_other_plots(selected_location, start_year, end_year, selected_month_others, selected_hours_others, prec_kind, active_tab):
-
 	anos = list(range(start_year, end_year + 1))
 	
 	if active_tab == "other":
-		
 		df_wind = load_data(selected_location, anos, 'VENTOS', df_locais)
 		df_sst = load_data(selected_location, anos, 'SST', df_locais)
 				
@@ -750,11 +619,8 @@ def update_other_plots(selected_location, start_year, end_year, selected_month_o
 		fig_other_hourly = plot_others_hour(df_locais, df_wind, anos, selected_location, selected_month_others, prec_kind)
 			
 		return [fig_other, fig_other_hourly, fig_other_prec, fig_other_temp, fig_other_sst]
-
 	else:
 		return [no_update]*5
-
-
 	
 if __name__ == '__main__':
 	app.run_server(debug=True)

@@ -7,48 +7,29 @@ import requests
 import io
 
 def load_data(location, years, type, df_locais):
-
 	gmt_offset = df_locais[df_locais['location'] == location]['time_zone'].values
 	gmt_offset = gmt_offset.item()
 
 	dataframes_list = []
 
 	for year in years:
-		
 		if type == 'ONDAS':
 			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/csv/ONDAS_{location}_{year}.csv"
 			#filename_csv = f"csv/ONDAS_{location}_{year}.csv"
-		
 		elif type == 'VENTOS':
 			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/ventos_csv/VENTOS_{location}_{year}.csv"
 			#filename_csv = f"ventos_csv/VENTOS_{location}_{year}.csv"
-			
 		elif type == 'SST':
 			filename_csv = f"https://raw.githubusercontent.com/hpgregorio/wave_climatology/master/sst_csv/SST_{location}_{year}.csv"
 			#filename_csv = f"sst_csv/SST_{location}_{year}.csv"
 		
-		
-		#headers = {'Accept': 'text/csv'}
-		#response = requests.get(filename_csv, headers=headers)
-		#csv_data = response.text
-		#df = pd.read_csv(io.StringIO(csv_data))
-		
-		
 		df = pd.read_csv(filename_csv)
-		
 		df['Datetime'] = pd.to_datetime(df['Datetime'])
-		
 		df['Datetime'] = df['Datetime'] + timedelta(hours=+gmt_offset)
-		
 		dataframes_list.append(df)
-
 	return pd.concat(dataframes_list, ignore_index=True)
 	
-	
-	
-	
 def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours=None):
-
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
 	
 	if selected_years[0] == selected_years[-1]:
@@ -58,36 +39,25 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 	
 	if selected_hours is not None:
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
-		
 		# Criando uma coluna no dataframe para representar o intervalo de altura
 		if parametro == 'CardinalDirection' or parametro == 'WindType':
 			df_selected_hours['Range'] = pd.Categorical(df_selected_hours[parametro], categories=bins, ordered=True)
 		else:
 			df_selected_hours['Range'] = pd.cut(df_selected_hours[parametro], bins=bins, labels=labels, right=False)
-
 		height_distribution = df_selected_hours.groupby([df_selected_hours['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
-
 		hours_tit = ':00 , '.join(['%1.0f' % val for val in selected_hours])
 		titul = f'{tit}<br>{nome_parametro} - {title_years} ({hours_tit}:00)'
-		
 	else:
 		if parametro == 'CardinalDirection' or parametro == 'WindType':
 			df['Range'] = pd.Categorical(df[parametro], categories=bins, ordered=True)
 		else:
 			df['Range'] = pd.cut(df[parametro], bins=bins, labels=labels, right=False)
-
 		height_distribution = df.groupby([df['Datetime'].dt.month, 'Range'])[parametro].count().unstack()
-		
 		titul = f'{tit}<br>{nome_parametro} - {title_years}'
-	
 	# Calculando a porcentagem da distribuição
 	height_distribution_percentage = height_distribution.div(height_distribution.sum(axis=1), axis=0) * 100
-	
-	# Obtendo os nomes dos meses
 	month_names = ['Jan', 'Feb', 'Mar' , 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-	# Criando o gráfico de barras empilhadas com Plotly
-	
+	# Criando o gráfico de barras
 	traces = []
 	for col in height_distribution_percentage.columns:
 		trace = go.Bar(
@@ -97,7 +67,6 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 			marker=dict(color=bin_color_map[col])
 		)
 		traces.append(trace)
-
 	if parametro=='CardinalDirection':
 		layout = go.Layout(
 			showlegend=False,
@@ -130,44 +99,30 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 			yaxis_gridcolor='lightgray',
 			yaxis_gridwidth=0.0001
 		)
-
 	fig = go.Figure(data=traces, layout=layout)
-	
 	return fig
 
-
-
-
 def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametro, nome_parametro, bin_color_map, selected_location, selected_hours=None):
-
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
-		
 	years = list(selected_years)  # Converter para lista
-	
 	month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 	title_month = f"{month_names[mes-1]}"
-
 
 	if selected_hours is not None:
 		df_selected_hours = df[df['Datetime'].dt.hour.isin(selected_hours)]
 		month_data = df_selected_hours[df_selected_hours['Datetime'].dt.month == mes]
-		
 		hours_tit = ':00 , '.join(['%1.0f' % val for val in selected_hours])
 		titul = f'{tit}<br>{nome_parametro} - {title_month} ({hours_tit}:00)'
-		
 	else:
 		month_data = df[df['Datetime'].dt.month == mes]
-		
 		titul = f'{tit}<br>{nome_parametro} - {title_month}'
-
 	if parametro == 'CardinalDirection' or parametro == 'WindType':
 		month_data['Range'] = pd.Categorical(month_data[parametro], categories=bins, ordered=True)
 	else:
 		month_data['Range'] = pd.cut(month_data[parametro], bins=bins, labels=labels, right=False)
-
 	month_height_distribution = month_data.groupby([month_data['Datetime'].dt.year, 'Range'])[parametro].count().unstack()
 	month_height_distribution_percentage = month_height_distribution.div(month_height_distribution.sum(axis=1), axis=0) * 100
-
+	#Grafico
 	traces = []
 	for col in month_height_distribution_percentage.columns:
 		trace = go.Bar(
@@ -177,7 +132,6 @@ def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametr
 			marker=dict(color=bin_color_map[col])
 		)
 		traces.append(trace)
-
 	if parametro=='CardinalDirection':
 		layout = go.Layout(
 			showlegend=False,
@@ -210,14 +164,10 @@ def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametr
 			yaxis_gridcolor='lightgray',
 			yaxis_gridwidth=0.0001
 		)		
-		
 	years_ticks = list(selected_years)
 	layout.update(xaxis=dict(tickvals=years_ticks, ticktext=years_ticks, tickfont=dict(size=8)))
-
 	fig = go.Figure(data=traces, layout=layout)
 	return fig
-	
-	
 
 def plot_custom_conditions_frequency(df, conditions, selected_years):
 	# Criando uma coluna para verificar se cada linha atende às condições
@@ -516,7 +466,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		if prec_kind == 'perc':
 			tit_y = f'Occurancy (%) of days with<br>precipitation over 1 mm/day'
 		else:
-			tit_y = 'Precipitation (mm/h)'
+			tit_y = 'Precipitation (mm/month)'
 		
 
 		fig.update_layout(
@@ -588,7 +538,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		if prec_kind == 'perc':
 			tit_y = f'Occurancy (%) of days with<br>precipitation over 1 mm/day'
 		else:
-			tit_y = 'Precipitation (mm/h)'
+			tit_y = 'Precipitation (mm/month)'
 		
 		fig.update_layout(title=tit,
 			yaxis=dict(title=tit_y),# range=[0, 200]),
@@ -1022,13 +972,6 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 		hourly_prec_avg = percentage_rainy_days['PercentageRainyDays']	
 	
 		
-	
-	
-	
-	
-	
-	
-	
 	if selected_years[0] == selected_years[-1]:
 		title_years = f"{selected_years[0]}"
 	else:
@@ -1095,7 +1038,7 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 		
 		fig.update_layout(
 			title=tit,
-			yaxis=dict(title=tit),# range=[0, 200]),
+			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(title='Air Temp (°C)'),
 			plot_bgcolor='rgba(255,255,255,0)',
 			yaxis_gridcolor='lightgray',
