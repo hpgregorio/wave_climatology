@@ -1,38 +1,35 @@
 "region","location","menu","title","onshore","offshore","side","side_onshore","side_offshore","time_zone","lat","lon"
-"South America","ATINS","BRAZIL - Atins/MA","Atins/MA (Brazil)","N;NE","S;SW","SE;NW","E","W",-3,-2.52,-42.76
-"South America","JERICOACOARA","BRAZIL - Jericoacoara/CE","Jericoacoara/CE (Brazil)","N","S","W;E","NE;NW","SE;SW",-3,-2.77,-40.52
-"South America","SALVADOR","BRAZIL - Salvador/BA","Salvador/BA (Brazil)","SE;S","N;NW","SW;NE","E","W",-3,-13.05,-38.50
-"South America","REGENCIA","BRAZIL - Regencia/ES","Regência/ES (Brazil)","SE;S","N;NW","SW;NE","E","W",-3,-19.69,-39.80
-"South America","SAQUAREMA","BRAZIL - Saquarema/RJ","Saquarema/RJ (Brazil)","S","N","E;W","SE;SW","NE;NW",-3,-22.94,-42.81
-"South America","SAOSEBASTIAO","BRAZIL - Sao Sebastiao/SP","Sao Sebastiao/SP (Brazil)","SW;S","NE;N","W;E","SE","NW",-3,-24.4,-45.5
-"South America","GAROPABA","BRAZIL - Garopaba/SC","Garopaba/SC (Brazil)","E;SW","W;NE","SE;NW","S","N",-3,-28.04,-48.56
-"Africa","CABOVERDE","CABO VERDE - Sal Island","Sal Island (Cabo Verde)","E","W","N;S","NE;SW","NW;SE",-1,16.575,-22.93
-"Central America/Caribe","CRICANORTE","COSTA RICA - Guanacaste","Guanacaste (Costa Rica)","W;SW","E;NE","NW;SE","S","N",-6,10.1,-85.9
-"Central America/Caribe","CRICASUL","COSTA RICA - Peninsula Osa","Peninsula Osa (Costa Rica)","E","W","N;S","NE;SE","NW;SW",-6,8.1,-83.2
-"Central America/Caribe","CABARET","DOMINICAN REPUBLIC - Cabaret","Cabaret (Dominican Republic)","NW;W","SE;E","NE;SW","N","S",-4,19.725,-70.375
-"Central America/Caribe","ELSALVADOR","EL SALVADOR - El Tunco","El Tunco (El Salvador)","S","N","W;E","SW;SE","NW;NE",-6,13,-89.4
-"Asia","BALI","INDONESIA - Bali","Bali (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-8.92,115.15
-"Asia","MENTAWAI","INDONESIA - Mentawai","Mentawai (Indonesia)","SE","NW","NE;SW","S;E","N;W",8,-1.96,99
-"Asia","SUMBAWA","INDONESIA - Sumbawa","Sumbawa (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-9.12,116.8
-"North America","SALINACRUZ","MEXICO - Salina Cruz","Salina Cruz (Mexico)","S;SE","N;NW","NE;SW","E","W",-6,16.11,-95.17
-"Africa","MARROCOSMIRLEFT","MOROCCO - Mirleft","Mirleft (Morocco)","NW","SE","NE;SW","N;W","S;E",1,29.5,-10.2
-"Africa","MARROCOSKAOKI","MOROCCO - Sidi Kaoki","Sidi Kaoki (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.55,-9.9
-"Africa","MARROCOSTAGHAZOUT","MOROCCO - Taghazout","Taghazout (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.4,-9.8
-"South America","PACASMAYO","PERU - Pacasmayo","Pacasmayo (Peru)","NW;W","SE;E","SW;NE","N","S",-5,-7.4,-79.8
-"Asia","CLOUDNINE","PHILIPPINES - Cloud 9","Cloud 9 (Philippines)","W","E","N;S","SW;NW","SE;NE",8,9.81,126.17
-"Africa","JEFREYS","SOUTH AFRICA - Jefrey's Bay","Jefrey's Bay (South Africa)","E;SE","W;NW","NE;SW","S","N",2,-34.08,25
-"Asia","HUAHIN","THAILAND - Hua Hin","Hua Hin (Thailand)","W","E","N;S","SW;NW","SE;NE",7,12.55,100.05
-"North America","ELMERS","USA - Elmers Island/LA","Elmers Island/LA (USA)","SE","NW","NE;SW","E;S","N;W",-5,29.17,-90.5
-"South America","MATANZAS","CHILE - Matanzas","Matanzas (Chile)","W;NW","E;SE","N;S","SW","NE",-3,-33.95831,-71.89574
-"Central America/Caribe","ELCOLORADO","NICARAGUA - El Colorado","El Colorado (Nicaragua)","S;SW","N;NE","SE;NW","W","E",-6,11.39183,-86.06528
-"North America","OAHU","HAWAII - North Shore Oahu","North Shore Oahu (Hawaii)","NW;N","SE;S","NE;SW","W","E",-10,21.71538,-158.07067
-"Oceania","RAGLAN","NEW ZELAND - Raglan","Raglan (New Zeland)","W;NW","E;SE","N;S","SW","NE",12,-37.80152,174.73101
-"Oceania","GOLDCOAST","AUSTRALIA - Gold Coast","Gold Coast (Australia)","W","E","N;S","SW;NW","SE;NE",10,-28.06908,153.64981
-"Oceania","PERTH","AUSTRALIA - Perth","Perth (Australia)","W;NW","E;SE","N;S","SW","NE",8,-33.92826,114.80442
-"Europe","HOSSEGOR","FRANCE - Hossegor","Hossegor (France)","W;NW","E;SE","N;S","SW","NE",2,43.52487,-1.56672
-"Europe","ERICEIRA","PORTUGAL - Ericeira","Ericeira (Portugal)","W;NW","E;SE","N;S","SW","NE",1,38.97205,-9.54866
-"Central America/Caribe","LOSROQUES","VENEZUELA - Los Roques","Los Roques (Venezuela)","N","S","W;E","NE;NW","SE;SW",-4,11.96212,-66.6719
-"Africa","DAKHLA","MOROCCO - Dakhla","Dakhla (Morocco)","W;SW","E;NE","N;S","NW","SE",1,23.65026",-16.01698
-
-
-
+"South America","ATINS","BRAZIL - Atins/MA","Atins/MA (Brazil)","N;NE","S;SW","SE;NW","E","W",-3,-2.41666667,-42.75
+"South America","JERICOACOARA","BRAZIL - Jericoacoara/CE","Jericoacoara/CE (Brazil)","N","S","W;E","NE;NW","SE;SW",-3,-2.75,-40.5
+"South America","SALVADOR","BRAZIL - Salvador/BA","Salvador/BA (Brazil)","SE;S","N;NW","SW;NE","E","W",-3,-13.08333333,-38.5
+"South America","REGENCIA","BRAZIL - Regencia/ES","Regência/ES (Brazil)","SE;S","N;NW","SW;NE","E","W",-3,-19.75,-39.83333333
+"South America","SAQUAREMA","BRAZIL - Saquarema/RJ","Saquarema/RJ (Brazil)","S","N","E;W","SE;SW","NE;NW",-3,-23.,-42.41666667
+"South America","SAOSEBASTIAO","BRAZIL - Sao Sebastiao/SP","Sao Sebastiao/SP (Brazil)","SW;S","NE;N","W;E","SE","NW",-3,-24.08333333,-45.5
+"South America","GAROPABA","BRAZIL - Garopaba/SC","Garopaba/SC (Brazil)","E;SW","W;NE","SE;NW","S","N",-3,-28.08333333,-48.58333333
+"Africa","CABOVERDE","CABO VERDE - Sal Island","Sal Island (Cabo Verde)","E","W","N;S","NE;SW","NW;SE",-1,16.58333333,-22.91666667
+"Central America/Caribe","CRICANORTE","COSTA RICA - Guanacaste","Guanacaste (Costa Rica)","W;SW","E;NE","NW;SE","S","N",-6,10.08333333,-85.91666667
+"Central America/Caribe","CRICASUL","COSTA RICA - Peninsula Osa","Peninsula Osa (Costa Rica)","E","W","N;S","NE;SE","NW;SW",-6,8.08333333,-83.16666667
+"Central America/Caribe","CABARET","DOMINICAN REPUBLIC - Cabaret","Cabaret (Dominican Republic)","NW;W","SE;E","NE;SW","N","S",-4,19.75,-70.41666667
+"Central America/Caribe","ELSALVADOR","EL SALVADOR - El Tunco","El Tunco (El Salvador)","S","N","W;E","SW;SE","NW;NE",-6,13.,-89.41666667
+"Asia","BALI","INDONESIA - Bali","Bali (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-8.91666667,115.16666667
+"Asia","MENTAWAI","INDONESIA - Mentawai","Mentawai (Indonesia)","SE","NW","NE;SW","S;E","N;W",8,-2.,99.
+"Asia","SUMBAWA","INDONESIA - Sumbawa","Sumbawa (Indonesia)","S","N","E;W","SE;SW","NE;NW",8,-9.08333333,116.83333333
+"North America","SALINACRUZ","MEXICO - Salina Cruz","Salina Cruz (Mexico)","S;SE","N;NW","NE;SW","E","W",-6,16.08333333,-95.16666667
+"Africa","MARROCOSMIRLEFT","MOROCCO - Mirleft","Mirleft (Morocco)","NW","SE","NE;SW","N;W","S;E",1,29.5,-10.16666667
+"Africa","MARROCOSKAOKI","MOROCCO - Sidi Kaoki","Sidi Kaoki (Morocco)","W","E","N;S","NW;SW","NE;SE",1,31.41666667,-9.91666667
+"Africa","MARROCOSTAGHAZOUT","MOROCCO - Taghazout","Taghazout (Morocco)","W","E","N;S","NW;SW","NE;SE",1,30.41666667,-9.83333333
+"South America","PACASMAYO","PERU - Pacasmayo","Pacasmayo (Peru)","NW;W","SE;E","SW;NE","N","S",-5,-7.41666667,-79.83333333
+"Asia","CLOUDNINE","PHILIPPINES - Cloud 9","Cloud 9 (Philippines)","W","E","N;S","SW;NW","SE;NE",8,9.83333333,126.16666667
+"Africa","JEFREYS","SOUTH AFRICA - Jefrey's Bay","Jefrey's Bay (South Africa)","E;SE","W;NW","NE;SW","S","N",2,-34.08333333,25.
+"Asia","HUAHIN","THAILAND - Hua Hin","Hua Hin (Thailand)","W","E","N;S","SW;NW","SE;NE",7,12.66666667,100.
+"North America","ELMERS","USA - Elmers Island/LA","Elmers Island/LA (USA)","SE","NW","NE;SW","E;S","N;W",-5,29.16666667,-90.5
+"South America","MATANZAS","CHILE - Matanzas","Matanzas (Chile)","W;NW","E;SE","N;S","SW","NE",-3,-33.91666667,-72.08333333
+"Central America/Caribe","ELCOLORADO","NICARAGUA - El Colorado","El Colorado (Nicaragua)","S;SW","N;NE","SE;NW","W","E",-6,11.25,-86.08333333
+"North America","OAHU","HAWAII - North Shore Oahu","North Shore Oahu (Hawaii)","NW;N","SE;S","NE;SW","W","E",-10,21.75,-158.08333333
+"Oceania","RAGLAN","NEW ZELAND - Raglan","Raglan (New Zeland)","W;NW","E;SE","N;S","SW","NE",12,-37.83333333,174.75
+"Oceania","GOLDCOAST","AUSTRALIA - Gold Coast","Gold Coast (Australia)","W","E","N;S","SW;NW","SE;NE",10,-28.08333333,153.66666667
+"Oceania","PERTH","AUSTRALIA - Perth","Perth (Australia)","W;NW","E;SE","N;S","SW","NE",8,-33.91666667,114.83333333
+"Europe","HOSSEGOR","FRANCE - Hossegor","Hossegor (France)","W;NW","E;SE","N;S","SW","NE",2,43.5,-1.58333333
+"Europe","ERICEIRA","PORTUGAL - Ericeira","Ericeira (Portugal)","W;NW","E;SE","N;S","SW","NE",1,39.,-9.58333333
+"Central America/Caribe","LOSROQUES","VENEZUELA - Los Roques","Los Roques (Venezuela)","N","S","W;E","NE;NW","SE;SW",-4,12.,-66.66666667
+"Africa","DAKHLA","MOROCCO - Dakhla","Dakhla (Morocco)","W;SW","E;NE","N;S","NW","SE",1,23.66666667,-16.
