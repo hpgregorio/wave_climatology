@@ -36,7 +36,7 @@ app.layout = dbc.Accordion([
 							options = [{'label': region, 'value': region} for region in sorted(df_locais['region'].unique()) ],
 							value='South America'
 						),
-					]),
+					],style={'max-width': '360px'}),
 					html.Label("Location:"),
 					
 					html.Div([
@@ -47,7 +47,7 @@ app.layout = dbc.Accordion([
 									],
 							value=['SAOSEBASTIAO']
 						),
-					]),
+					],style={'max-width': '360px'}),
 					html.Br(),
 					html.Label("Years selection:"),
 					html.Div([
@@ -64,11 +64,13 @@ app.layout = dbc.Accordion([
 						),
 					], style={'display': 'flex', 'alignItems': 'center'}),
 					html.Br(),
-					dbc.Tabs([
-						dbc.Tab(label="Waves", tab_id="waves"),
-						dbc.Tab(label="Wind", tab_id="wind"),
-						dbc.Tab(label="Others", tab_id="other"),
-					], id="tabs",active_tab="waves"),
+					html.Div([
+						dbc.Tabs([
+							dbc.Tab(label="Waves", tab_id="waves"),
+							dbc.Tab(label="Wind", tab_id="wind"),
+							dbc.Tab(label="Climate", tab_id="other"),
+						], id="tabs",active_tab="waves"),
+					],style={'max-width': '360px'}),
 					html.Div([
 						html.Br(),
 						dcc.Graph(id='monthly-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
@@ -112,7 +114,7 @@ app.layout = dbc.Accordion([
 								value=1,
 								style={'width': '100%', 'display': 'inline-block'}
 							),
-						]),
+						],style={'max-width': '360px'}),
 						dcc.Graph(id='annual-stats-plot-alt', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='annual-stats-plot-dir', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wave2', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
@@ -120,19 +122,21 @@ app.layout = dbc.Accordion([
 					], id="waves-content", style={'display': 'block'}),
 					#WIND				
 					html.Div([
-						html.Br(),
-						html.Label("Select the hours of the day to analyze the wind"),
-						html.Br(),
-						html.Label("(LOCAL TIME - more than one = average):"),
-						dcc.Dropdown(
-							id='horarios-checklist_wind',
-							options=[
-								{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
-							],
-							value=[12],
-							multi=True,
-							style={'white-space': 'pre'}
-						),	
+						html.Div([
+							html.Br(),
+							html.Label("Select the hours of the day to analyze the wind"),
+							html.Br(),
+							html.Label("(LOCAL TIME - more than one = average):"),
+							dcc.Dropdown(
+								id='horarios-checklist_wind',
+								options=[
+									{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
+								],
+								value=[12],
+								multi=True,
+								style={'white-space': 'pre'}
+							),
+						],style={'max-width': '360px'}),
 						dcc.Graph(id='monthly-stats-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='monthly-stats-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wind1', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
@@ -147,7 +151,7 @@ app.layout = dbc.Accordion([
 								value=1,
 								style={'width': '100%', 'display': 'inline-block'}
 							),
-						]),
+						],style={'max-width': '360px'}),
 						dcc.Graph(id='hour-month-plot-int_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='hour-month-plot-dir_wind', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						dcc.Graph(id='rose_wind_wind2', figure=rose, style={'width': '100%', 'display': 'center'}, config={'displayModeBar': False, 'staticPlot': True}),
@@ -159,19 +163,21 @@ app.layout = dbc.Accordion([
 					], id="wind-content", style={'display': 'none'}),	
 					#OTHERS
 					html.Div([
-						html.Br(),
-						html.Label("Select the hours of the day to analyze the air"),
-						html.Br(),
-						html.Label("temperature (LOCAL TIME - more than one = average):"),
-						dcc.Dropdown(
-							id='horarios-checklist_sst',
-							options=[
-								{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
-							],
-							value=[9],
-							multi=True,
-							style={'white-space': 'pre'}
-						),
+						html.Div([
+							html.Br(),
+							html.Label("Select the hours of the day to analyze the air"),
+							html.Br(),
+							html.Label("temperature (LOCAL TIME - more than one = average):"),
+							dcc.Dropdown(
+								id='horarios-checklist_sst',
+								options=[
+									{'label': f' {hora:02d}:00   ', 'value': hora} for hora in [0, 3, 6, 9, 12, 15, 18, 21]
+								],
+								value=[9],
+								multi=True,
+								style={'white-space': 'pre'}
+							),
+						],style={'max-width': '360px'}),
 						html.Br(),
 						html.Label("Select the units for precipitation:"),
 						html.Br(),
@@ -201,7 +207,7 @@ app.layout = dbc.Accordion([
 								value=1,
 								style={'width': '100%', 'display': 'inline-block'}
 							),
-						]),
+						],style={'max-width': '360px'}),
 						html.Br(),
 						dcc.Graph(id='other_times', style={'width': '100%'}, config={'displayModeBar': False, 'staticPlot': True}),
 						html.Br(),
@@ -267,6 +273,8 @@ app.layout = dbc.Accordion([
 				),
 				html.Br(),
 				html.Label("Locations where the analyses are available (for suggestions, contact me):"),
+				html.Br(),
+				html.Br(),
 				dcc.Graph(id='map', figure = fig_map, config={'displayModeBar': False}),
 				html.Br(),
 			],
@@ -312,6 +320,13 @@ def update_horarios_labels(selected_location):
 def update_menus(region):
 	sites_location = df_locais[df_locais['region'] == region]['location'].values
 	sites_menu = df_locais[df_locais['region'] == region]['menu'].values
+	
+	indices = sorted(range(len(sites_menu)), key=lambda k: sites_menu[k])
+
+
+	sites_location = [sites_location[i] for i in indices]
+	sites_menu = [sites_menu[i] for i in indices]
+	
 	
 	options = [{'label': menu, 'value': location} for menu, location in zip(sites_menu, sites_location)]
 	return  options, sites_location[0]

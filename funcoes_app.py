@@ -2,6 +2,7 @@ import pandas as pd
 from numpy import select
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+import plotly.express as px
 from datetime import timedelta
 import requests
 import io
@@ -70,7 +71,7 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 	if parametro=='CardinalDirection':
 		layout = go.Layout(
 			showlegend=False,
-			title=titul,
+			title=dict(text=titul,font=dict(size=15)),
 			yaxis=dict(title='Occurency (%)', range=[0, 100]),
 			barmode='stack',
 			height=330,
@@ -82,7 +83,7 @@ def plot_monthly_stats(df_locais, df, selected_years, bins, labels, parametro, n
 		)
 	else:
 		layout = go.Layout(
-			title=titul,
+			title=dict(text=titul,font=dict(size=15)),
 			yaxis=dict(title='Occurency (%)', range=[0, 100]),
 			legend=dict(
 				x=-0.15,
@@ -135,7 +136,7 @@ def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametr
 	if parametro=='CardinalDirection':
 		layout = go.Layout(
 			showlegend=False,
-			title=titul,
+			title=dict(text=titul,font=dict(size=15)),
 			yaxis=dict(title='Occurency (%)', range=[0, 100]),
 			barmode='stack',
 			height=330,
@@ -147,7 +148,7 @@ def plot_annual_stats(df_locais, df, selected_years, mes, bins, labels, parametr
 		)
 	else:
 		layout = go.Layout(
-			title=titul,
+			title=dict(text=titul,font=dict(size=15)),
 			yaxis=dict(title='Occurency (%)', range=[0, 100]),
 			legend=dict(
 				x=-0.15,
@@ -212,7 +213,7 @@ def plot_custom_conditions_frequency(df, conditions, selected_years):
 	fig.add_trace(trace)
 	
 	fig.update_layout(
-		title=f'Occurency according with the conditions<br>- {title_years}',
+		title=dict(text=f'Occurency according with the conditions<br>- {title_years}',font=dict(size=15)),
 		yaxis=dict(title='Occurency (%)', range=[0, 100]),
 		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
@@ -470,7 +471,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		
 
 		fig.update_layout(
-			title=tit,
+			title=dict(text=tit,font=dict(size=15)),
 			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(title='Air Temp (°C)'),
 			yaxis3=dict(title='Sea Temp (°C)'),
@@ -662,7 +663,7 @@ def plot_annual_stats_others(df_locais, df, selected_years, mes, parametro, nome
 	fig.add_trace(trace)
 	
 	layout = go.Layout(
-		title=titul,
+		title=dict(text=titul,font=dict(size=15)),
 		yaxis=dict(title=titulo),
 		plot_bgcolor='rgba(255,255,255,0)',
 		yaxis_gridcolor='lightgray',
@@ -729,7 +730,7 @@ def plot_rose():
 		height=100,
 		width=100,
 		margin=dict(l=20, r=20, t=20, b=20)
-    )
+	)
 	
 	return fig
 	
@@ -767,44 +768,67 @@ def converter_horarios_gmt(horarios, gmt):
 	horarios_convertidos = [(hora + gmt) % 24 for hora in horarios]
 	return horarios_convertidos
 	
-def plot_map(df):
-	fig = go.Figure(
-			data=go.Scattergeo(
-				lat = df['lat'],
-				lon = df['lon'],
-				text = df['menu'].astype(str),
-				marker = dict(
-					color = 'red',
-					size = 10
-				)
-			)
-    )
+# def plot_map(df):
+	# fig = go.Figure(
+			# data=go.Scattergeo(
+				# lat = df['lat'],
+				# lon = df['lon'],
+				# text = df['menu'].astype(str),
+				# marker = dict(
+					# color = 'red',
+					# size = 10
+				# )
+			# )
+	# )
 
-	fig.update_geos(#projection_type="orthographic",
-		resolution=50,
-		showcoastlines=True, coastlinecolor="Black", coastlinewidth=0.5,
-		showland=True, landcolor="rgb(212, 212, 212)", countrywidth=0.5,
-		#showocean=True, oceancolor="rgb(255, 255, 255)",
-		showcountries = True, countrycolor = "rgb(255, 255, 255)",
-		lonaxis = dict(
-			showgrid = True,
-			gridwidth = 0.5,
-			dtick=10
-		),
-		lataxis = dict (
-			showgrid = True,
-			gridwidth = 0.5,
-			dtick=10
-		)		
+	# fig.update_geos(#projection_type="orthographic",
+		# resolution=50,
+		# showcoastlines=True, coastlinecolor="Black", coastlinewidth=0.5,
+		# showland=True, landcolor="rgb(212, 212, 212)", countrywidth=0.5,
+		# #showocean=True, oceancolor="rgb(255, 255, 255)",
+		# showcountries = True, countrycolor = "rgb(255, 255, 255)",
+		# lonaxis = dict(
+			# showgrid = True,
+			# gridwidth = 0.5,
+			# dtick=10
+		# ),
+		# lataxis = dict (
+			# showgrid = True,
+			# gridwidth = 0.5,
+			# dtick=10
+		# )		
+	# )
+
+	# fig.update_layout(
+		# height=300, 
+		# margin={"r":0,"t":0,"l":0,"b":0},
+	# )
+	# return fig
+
+
+def plot_map(df):
+	fig = px.scatter_mapbox(
+		df,
+		lat="lat",
+		lon="lon",
+		#text="menu",
+		zoom=-0.55,
+		mapbox_style="open-street-map",
+		height=230,
+		width=350,
+		hover_name="menu",  # Set the column for hover information
+		hover_data={"lat": False, "lon": False}  # Hide lat and lon in hover tooltip
 	)
 
 	fig.update_layout(
-		height=300, 
-		margin={"r":0,"t":0,"l":0,"b":0},
-	)
+		mapbox=dict(
+			center=dict(lat=0, lon=0),
+			style="open-street-map"
+		),
+		margin=dict(r=0, t=0, l=0, b=0),
+    )
+
 	return fig
-
-
 
 
 
@@ -857,7 +881,7 @@ def plot_wind_hours(df_locais, df, selected_years, bins, labels, parametro, nome
 	if parametro=='CardinalDirection':
 		layout = go.Layout(
 			showlegend=False,
-			title=titul,
+			title=dict(text=titul,font=dict(size=15)),
 			yaxis=dict(title='Occurency (%)', range=[0, 100]),
 			barmode='stack',
 			height=330,
@@ -869,7 +893,7 @@ def plot_wind_hours(df_locais, df, selected_years, bins, labels, parametro, nome
 		)
 	else:
 		layout = go.Layout(
-			title=titul,
+			title=dict(text=titul,font=dict(size=15)),
 			yaxis=dict(title='Occurency (%)', range=[0, 100]),
 			legend=dict(
 				x=-0.15,
@@ -1037,7 +1061,7 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 			tit_y = 'Precipitation (mm/h)'
 		
 		fig.update_layout(
-			title=tit,
+			title=dict(text=tit,font=dict(size=15)),
 			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(title='Air Temp (°C)'),
 			plot_bgcolor='rgba(255,255,255,0)',
@@ -1095,7 +1119,7 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 		else:
 			tit_y = 'Precipitation (mm/h)'
 
-		fig.update_layout(title=tit,
+		fig.update_layout(title=dict(text=tit,font=dict(size=15)),
 			yaxis=dict(title=tit_y),# range=[0, 200]),
 			yaxis2=dict(
 				title='Temp (°C)',
