@@ -222,7 +222,7 @@ app.layout = dbc.Accordion([
 				]),
 			]
 		),
-		title="Data",
+		title="When2board",
 	),
 	dbc.AccordionItem(
 		html.Div(style={'max-width': '350px'},
