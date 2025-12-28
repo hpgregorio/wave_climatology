@@ -53,14 +53,14 @@ app.layout = dbc.Accordion([
 					html.Div([
 						dcc.Dropdown(
 							id='start-year',
-							options=[{'label': str(i), 'value': i} for i in range(1993, 2024)],
+							options=[{'label': str(i), 'value': i} for i in range(1993, 2026)],
 							value=1993,
 						),
 						html.Div(children='→', style={'margin': '0 10px'}),
 						dcc.Dropdown(
 							id='end-year',
-							options=[{'label': str(i), 'value': i} for i in range(1993, 2024)],
-							value=2023,
+							options=[{'label': str(i), 'value': i} for i in range(1993, 2026)],
+							value=2025,
 						),
 					], style={'display': 'flex', 'alignItems': 'center'}),
 					html.Br(),

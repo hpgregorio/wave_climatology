@@ -244,15 +244,15 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 
 	tit = str(df_locais[df_locais['location'] == selected_location]['title'].values[0])
 		
-	if selected_years != list(range(1993, 2023 + 1)):
+	if selected_years != list(range(1993, 2025 + 1)):
 		#####
 		#historic data
 		#####
-		df_sst_hist = load_data(selected_location, list(range(1993, 2023 + 1)), 'SST', df_locais)
+		df_sst_hist = load_data(selected_location, list(range(1993, 2025 + 1)), 'SST', df_locais)
 		df_sst_hist['Month'] = df_sst_hist['Datetime'].dt.month
 		df_sst_hist['Year'] = df_sst_hist['Datetime'].dt.year
 		
-		df_temp_hist = load_data(selected_location, list(range(1993, 2023 + 1)), 'VENTOS', df_locais)
+		df_temp_hist = load_data(selected_location, list(range(1993, 2025 + 1)), 'VENTOS', df_locais)
 		df_temp_hist['Month'] = df_temp_hist['Datetime'].dt.month
 		df_temp_hist['Year'] = df_temp_hist['Datetime'].dt.year
 		
@@ -377,7 +377,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 		title_years = f"{selected_years[0]} to {selected_years[-1]}"
 	
 	
-	if selected_years != list(range(1993, 2023 + 1)):
+	if selected_years != list(range(1993, 2025 + 1)):
 
 		fig = make_subplots(rows=3, cols=1, shared_xaxes=False, vertical_spacing=0.05)
 		
@@ -395,7 +395,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			x=month_names,
 			#y=monthly_prec_avg_hist['prec'],
 			y=monthly_prec_avg_hist,
-			name='Historic Precipitation (1993 to 2023)',
+			name='Historic Precipitation (1993 to 2025)',
 			marker=dict(color='rgba(0, 0, 0, 0.2)')
 		)
 
@@ -404,7 +404,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			x=month_names,
 			y=monthly_temp_avg_hist,
 			mode='lines',
-			name='Historic Air Temp (%sh - 1993 to 2023)'%(hours_tit),
+			name='Historic Air Temp (%sh - 1993 to 2025)'%(hours_tit),
 			line=dict(color='rgb(67, 78, 150)', dash='dot'),
 			
 		)
@@ -436,7 +436,7 @@ def plot_others(df_locais, df, df_sst, selected_years, selected_location, select
 			x=month_names,
 			y=monthly_sst_avg_hist,
 			mode='lines',
-			name='Historic Sea Temp (1993 to 2023)',
+			name='Historic Sea Temp (1993 to 2025)',
 			line=dict(color='rgb(220, 20, 60)', dash='dot'),
 			
 		)
@@ -933,11 +933,11 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 	title_month = f"{month_names[mes-1]}"
 	tit = f'{tit} - {title_month}'
 
-	if selected_years != list(range(1993, 2023 + 1)):
+	if selected_years != list(range(1993, 2025 + 1)):
 		#####
 		#historic data
 		#####
-		df_temp_hist = load_data(selected_location, list(range(1993, 2023 + 1)), 'VENTOS', df_locais)
+		df_temp_hist = load_data(selected_location, list(range(1993, 2025 + 1)), 'VENTOS', df_locais)
 		
 		df_temp_hist = df_temp_hist[df_temp_hist['Datetime'].dt.month == mes]
 		
@@ -1002,7 +1002,7 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 		title_years = f"{selected_years[0]} to {selected_years[-1]}"
 	
 	
-	if selected_years != list(range(1993, 2023 + 1)):
+	if selected_years != list(range(1993, 2025 + 1)):
 
 		fig = make_subplots(rows=2, cols=1, shared_xaxes=False, vertical_spacing=0.15)
 		
@@ -1018,7 +1018,7 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 		trace_prec_hist = go.Bar(
 			x=hours_loc,
 			y=hourly_prec_avg_hist,
-			name='Historic Precipitation (1993 to 2023)',
+			name='Historic Precipitation (1993 to 2025)',
 			marker=dict(color='rgba(0, 0, 0, 0.2)')
 		)
 
@@ -1027,7 +1027,7 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 			x=hours_loc,
 			y=hourly_temp_avg_hist,
 			mode='lines',
-			name='Historic Air Temp (1993 to 2023)',
+			name='Historic Air Temp (1993 to 2025)',
 			line=dict(color='rgb(67, 78, 150)', dash='dot'),
 			
 		)
