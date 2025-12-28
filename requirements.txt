@@ -2,7 +2,7 @@ dash
 dash_bootstrap_components
 pandas
 numpy
-plotly>=6.0.0,<7.0.0
+plotly==6.0.1
 dash_bootstrap_templates
 datetime
 gunicorn
