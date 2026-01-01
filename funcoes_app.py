@@ -911,8 +911,8 @@ def plot_wind_hours(df_locais, df, selected_years, bins, labels, parametro, nome
 			yaxis_gridwidth=0.0001
 		)
 
-	hours_ticks = [f'{hour:02d}h' for hour in hours_loc]
-	layout.update(xaxis=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8)))
+	hours_ticks = [f'{hour:02d} h' for hour in hours_loc]
+	layout.update(xaxis=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8))
 
 	fig = go.Figure(data=traces, layout=layout)
 	
@@ -1085,9 +1085,9 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 			)
 		)
 		
-		hours_ticks = [f'{hour:02d}h' for hour in hours_loc]
-		fig.update_layout(xaxis=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8)))
-		fig.update_layout(xaxis2=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8)))
+		hours_ticks = [f'{hour:02d} h' for hour in hours_loc]
+		fig.update_layout(xaxis=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8))
+		fig.update_layout(xaxis2=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8))
 		
 		fig.add_trace(trace_prec_hist, row=1, col=1)
 		fig.add_trace(trace_prec, row=1, col=1)
@@ -1146,9 +1146,9 @@ def plot_others_hour(df_locais, df, selected_years, selected_location, mes, prec
 			)
 		)
 		
-		hours_ticks = [f'{hour:02d}h' for hour in hours_loc]
-		fig.update_layout(xaxis=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8)))
-		fig.update_layout(xaxis2=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8)))
+		hours_ticks = [f'{hour:02d} h' for hour in hours_loc]
+		fig.update_layout(xaxis=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8))
+		fig.update_layout(xaxis2=dict(tickvals=hours_loc, ticktext=hours_ticks), tickfont=dict(size=8))
 	
 		fig.add_trace(trace_prec)
 		fig.add_trace(trace_temp)
